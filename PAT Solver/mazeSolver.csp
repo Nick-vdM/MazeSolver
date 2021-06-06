@@ -1,0 +1,42 @@
+﻿///Ethan Lewis Maze Solevr
+
+//0 - Open spot
+//1 - Obstacle/wall
+//2 - Starting Location
+//3 - Goal
+
+//Size of the maze
+#define NoOfRows 10;
+#define NoOfCols 10;
+
+//The maze matrix.
+var maze[NoOfRows][NoOfCols]:{0..3} = [0,0,0,0,0,0,0,0,0,0, 
+									   0,2,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,3,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0,
+									   0,0,0,0,0,0,0,0,0,0];
+//Current position in maze									   
+var pos[2]:{0..9} = [1,1];
+
+//Move the current position up 1
+MoveUp() = [pos[1] != 0 && maze[pos[0]][pos[1]-1] != 1]moveup{pos[1] = pos[1] - 1;}-> Move();
+//Move the current position down 1
+MoveDown() = [pos[1] != NoOfCols - 1 && maze[pos[0]][pos[1]+1] != 1]movedown{pos[1] = pos[1] + 1;}-> Move();
+//Move the current position left 1
+MoveLeft() = [pos[0] != 0  && maze[pos[0]-1][pos[1]] != 1 ]moveleft{pos[0] = pos[0] - 1;}-> Move();
+//Move the current position right 1
+MoveRight() = [pos[0] != NoOfRows - 1 && maze[pos[0]+1][pos[1]] != 1]moveright{pos[0] = pos[0] + 1;}-> Move();
+
+//Define when goal is found
+#define goalGoalFound maze[pos[1]][pos[0]] == 3;
+
+
+//The task Move is the sequence of primitive tasks MoveUp, MoveDown, MoveLeft, MoveRight.
+Move() = MoveUp() [] MoveDown() [] MoveLeft() [] MoveRight();
+
+#assert Move() reaches goalGoalFound;
