@@ -17,10 +17,9 @@
 #include <stdio.h>
 #include <random>
 
-class randomGen{
+class randomGen {
 public:
-    randomGen(){
-        std::generate_n()
+    randomGen() {
     }
 
 private:
@@ -71,8 +70,8 @@ public:
 
     bool saveMaze() {
         /// Automatically picks a path under mazes/
-        std::string pathName = "mazes/" + currentDateTime() + '.txt';
-        return this->saveMaze();
+        std::string pathName = "mazes/" + currentDateTime() + ".txt";
+        return this->saveMaze(pathName);
     }
 
 private:
