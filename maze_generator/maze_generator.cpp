@@ -6,9 +6,11 @@
 // Implements a recursive backtracking algorithm to write
 // a maze into the mazes directory
 // https://stackoverflow.com/questions/60532245/implementing-a-recursive-backtracker-to-generate-a-maze
+// https://www.gormanalysis.com/blog/random-numbers-in-cpp/
 
 #include <iostream>
 #include <ctime>
+#include <utility>
 #include <vector>
 #include <stack>
 #include <unordered_map>
@@ -16,42 +18,6 @@
 #include <fstream>
 #include <cstdio>
 #include <random>
-
-class RNGUniformSize_t {
-    /**
-     * Singleton design pattern. Call RNGUniformSize_t::randomNumber()
-     * for a random number between 0 and size_t. In theory, it should be
-     * quite fast.
-     */
-public:
-    static void setSeed(long seed) {
-        if (!RNGUniformSize_t::singleton) {
-            delete RNGUniformSize_t::singleton;
-        }
-
-        RNGUniformSize_t::singleton = new RNGUniformSize_t(seed);
-    }
-
-    static size_t randomNumber() {
-        if (RNGUniformSize_t::singleton) {
-            RNGUniformSize_t::singleton = new RNGUniformSize_t;
-        }
-        return RNGUniformSize_t::dist(RNGUniformSize_t::dre);
-    }
-
-private:
-    explicit RNGUniformSize_t(long seed) {
-        RNGUniformSize_t::dre = std::default_random_engine(seed);
-        RNGUniformSize_t::dist = std::uniform_int_distribution<size_t>
-                (0, std::numeric_limits<size_t>::max());
-    }
-
-    RNGUniformSize_t() : RNGUniformSize_t(time(nullptr)) {}
-
-    static RNGUniformSize_t *singleton;
-    static std::default_random_engine dre;
-    static std::uniform_int_distribution<size_t> dist;
-};
 
 std::string currentDateTime() {
     time_t now = time(nullptr);
@@ -64,19 +30,29 @@ std::string currentDateTime() {
     return buffer;
 }
 
+struct cellInformation {
+    cellInformation(std::pair<size_t, size_t> location,
+                    std::vector<std::pair<size_t, size_t>> freeAdjacents) :
+            location{std::move(location)},
+            freeAdjacents{std::move(freeAdjacents)} {}
+
+    std::pair<size_t, size_t> location;
+    std::vector<std::pair<size_t, size_t>> freeAdjacents;
+};
+
 class RecursiveBacktrackingMaze {
 public:
-    RecursiveBacktrackingMaze(size_t &xParameter, size_t &yParameter) {
+    RecursiveBacktrackingMaze(size_t &x, size_t &y, size_t seed) :
+            x(x), y(y), rng(std::default_random_engine(seed)),
+            random0to3(std::uniform_int_distribution<uint8_t>(0, 3)),
+            random0toSize_t(std::uniform_int_distribution<size_t>(
+                    0, std::numeric_limits<size_t>::max())) {
         /**
-         * Fills the maze vector in storage.
+         * Fills the maze vector in storage with a set seed
          */
-        this->x = xParameter;
-        this->y = xParameter;
-
         // Start everything with walls - we'll be digging
         std::vector<char> filler(this->x, 'H');
         this->maze = std::vector<std::vector<char>>(this->y, filler);
-
 
         if (x < 2 && y < 2) {
             std::cerr << "WARNING: It is recommended that x and y are above 2"
@@ -88,29 +64,42 @@ public:
         // In a backtracking algorithm like this, an odd number is always
         // an open wall.
         this->startPos = std::pair<size_t, size_t>{
-                ((RNGUniformSize_t::randomNumber() % x) / 2 + 1) * 2,
-                ((RNGUniformSize_t::randomNumber() % y) / 2 + 1) * 2
+                ((this->random0toSize_t(this->rng) % x) / 2) * 2 + 1,
+                ((this->random0toSize_t(this->rng) % y) / 2) * 2 + 1
         };
 
         this->goalPos = std::pair<size_t, size_t>{
-                ((RNGUniformSize_t::randomNumber() % x) / 2 + 1) * 2,
-                ((RNGUniformSize_t::randomNumber() % y) / 2 + 1) * 2
+                ((this->random0toSize_t(this->rng) % x) / 2) * 2 + 1,
+                ((this->random0toSize_t(this->rng) % y) / 2) * 2 + 1
         };
 
         while (startPos == goalPos) {
             // In case it made the exact same number, keep trying to make
             // more until they're different
             this->goalPos = std::pair<size_t, size_t>{
-                    ((RNGUniformSize_t::randomNumber() % x) / 2 + 1) * 2,
-                    ((RNGUniformSize_t::randomNumber() % y) / 2 + 1) * 2
+                    ((this->random0toSize_t(this->rng) % x) / 2 + 1) * 2,
+                    ((this->random0toSize_t(this->rng) % y) / 2 + 1) * 2
             };
         }
+
+        std::cout << "Start " << startPos.first << " " << startPos.second <<
+                  std::endl <<
+                  "Finish " << goalPos.first << " " << goalPos.second <<
+                  std::endl;
 
         this->maze[startPos.second][startPos.first] = 'S';
         this->maze[goalPos.second][goalPos.first] = 'G';
 
         generateMaze();
     }
+
+    /**
+     * Fills the maze vector in storage with a random seed
+     */
+    RecursiveBacktrackingMaze(size_t &xParameter, size_t &yParameter) :
+            RecursiveBacktrackingMaze(
+                    xParameter, yParameter, time(nullptr)) {}
+
 
     std::vector<std::vector<char>> getMaze() {
         return maze;
@@ -151,22 +140,99 @@ private:
 
     /// The maze is represented as maze[y][x]
     std::vector<std::vector<char>> maze;
-    std::stack<std::pair<size_t, size_t>> pathTaken;
+    std::stack<cellInformation> pathTaken;
     /// We can look up a random direction with this
-    std::vector<std::vector<int8_t>> moves{
-            {0,  1},
-            {0,  -1},
-            {1,  0},
-            {-1, 0}
+    std::vector<std::pair<int8_t, int8_t>> moves{
+            {0,  2},
+            {0,  -2},
+            {2,  0},
+            {-2, 0}
     };
+
+    std::default_random_engine rng;
+    std::uniform_int_distribution<uint8_t> random0to3;
+    std::uniform_int_distribution<size_t> random0toSize_t;
 
     void generateMaze() {
         /**
          * Sets the this->maze vector based on the current format
          */
+        this->pathTaken.emplace(startPos,
+                                listSolidAdjacentCells(startPos));
+        while (!this->pathTaken.empty()) {
+            auto &currentCell = this->pathTaken.top();
+            // Roll back until currentCell has adjacent ones
+            while (currentCell.freeAdjacents.empty()) {
+                this->pathTaken.pop();
+                currentCell = this->pathTaken.top();
+            }
+            // Pick a random free one
+            uint8_t toMoveTo = random0to3(rng) %
+                               currentCell.freeAdjacents.size();
+
+            // Insert it into the stack as it is the next move
+            this->pathTaken.emplace(
+                    currentCell.freeAdjacents[toMoveTo],
+                    listSolidAdjacentCells(currentCell.freeAdjacents[toMoveTo])
+            );
+
+            // Pop it out of the last one
+            currentCell.freeAdjacents.erase(
+                    currentCell.freeAdjacents.begin() + toMoveTo
+            );
+
+            // Update the maze
+            markMazeClear(currentCell.location,
+                          this->pathTaken.top().location);
+        }
+    }
+
+    std::vector<std::pair<size_t, size_t>> listSolidAdjacentCells(
+            std::pair<size_t, size_t> coord) {
+        std::vector<std::pair<size_t, size_t>> clearCells;
+        for (auto &m : moves) {
+            // TODO: Validate that this can subtract
+            auto adjacent = std::pair<size_t, size_t>{
+                    m.first + coord.first,
+                    m.second + coord.second
+            };
+            if (!isClear(adjacent)) {
+                clearCells.push_back(adjacent);
+            }
+        }
+        return clearCells;
+    }
+
+    void markMazeClear(std::pair<size_t, size_t> &start, std::pair<size_t,
+            size_t> &finish) {
+        /// Marks all the cells between start and finish as clear if they are
+        /// walls
+
+        // First find the direction that they are different in
+        bool firstAxis = false;
+        if (start.first != finish.first) {
+            firstAxis = true;
+        }
+
+        // TODO: Verify these first/second operations are correct
+        if (firstAxis) {
+            for (size_t i = start.first; i > finish.first; i++) {
+                if (this->maze[i][start.second] == 'H') {
+                    this->maze[i][start.second] = 'O';
+                }
+            }
+        } else {
+            for (size_t i = start.second; i > finish.second; i++) {
+                if (this->maze[start.first][i] == 'H') {
+                    this->maze[start.first][i] = 'O';
+                }
+            }
+        }
     }
 
     bool isClear(std::pair<size_t, size_t> coord) const {
+        /// Evaluates true when the cell is not a wall and the coord is
+        // inside bounds
         if (coord.first > x || coord.first < 0 ||
             coord.second > y || coord.second < 0) {
             return false;
@@ -178,15 +244,17 @@ private:
 
         return true;
     }
+
+
 };
 
 int main(int argc, char **argv) {
-    if (argc != 2) {
+    if (argc != 3) {
         std::cerr << "ERROR: This function requires an x and y dimension for "
                      "maze size" << std::endl;
     }
-    size_t x = strtol(argv[0], nullptr, 10);
-    size_t y = strtol(argv[1], nullptr, 10);
+    size_t x = strtol(argv[1], nullptr, 10);
+    size_t y = strtol(argv[2], nullptr, 10);
 
     auto maze = RecursiveBacktrackingMaze(x, y);
     maze.saveMaze();
