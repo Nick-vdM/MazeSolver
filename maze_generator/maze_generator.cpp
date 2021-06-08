@@ -17,13 +17,40 @@
 #include <stdio.h>
 #include <random>
 
-class randomGen {
+class RNGUniformSize_t {
+    /**
+     * Singleton design pattern. Call RNGUniformSize_t::randomNumber()
+     * for a random number between 0 and size_t
+     */
 public:
-    randomGen() {
+    static void setSeed(long seed) {
+        if (!RNGUniformSize_t::singleton) {
+            delete RNGUniformSize_t::singleton;
+        }
+
+        RNGUniformSize_t::singleton = new RNGUniformSize_t(seed);
+    }
+
+    static size_t randomNumber() {
+        if (RNGUniformSize_t::singleton) {
+            RNGUniformSize_t::singleton = new RNGUniformSize_t;
+        }
+        return RNGUniformSize_t::dist(RNGUniformSize_t::dre);
     }
 
 private:
-    static std::random_device r;
+    RNGUniformSize_t(long seed) {
+        RNGUniformSize_t::dre = std::default_random_engine(seed);
+        RNGUniformSize_t::dist = std::uniform_int_distribution<size_t>
+                (0, std::numeric_limits<size_t>::max());
+    }
+
+    RNGUniformSize_t() {
+        RNGUniformSize_t(time(NULL));
+    }
+
+    static RNGUniformSize_t *singleton;
+    static std::default_random_engine dre;
     static std::uniform_int_distribution<size_t> dist;
 };
 
@@ -70,7 +97,9 @@ public:
 
     bool saveMaze() {
         /// Automatically picks a path under mazes/
-        std::string pathName = "mazes/" + currentDateTime() + ".txt";
+        std::string pathName = "mazes/" + std::to_string(this->x) + 'x' +
+                               std::to_string(this->y) +
+                               currentDateTime() + ".txt";
         return this->saveMaze(pathName);
     }
 
