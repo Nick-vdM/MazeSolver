@@ -31,10 +31,10 @@ std::string currentDateTime() {
 
 class RecursiveBacktrackingMaze {
 public:
-    RecursiveBacktrackingMaze(uint32_t &x, uint32_t &y, uint32_t seed) :
+    RecursiveBacktrackingMaze(int32_t &x, int32_t &y, int32_t seed) :
             x(x), y(y), rng(std::default_random_engine(seed)),
-            randomInt(std::uniform_int_distribution<uint32_t>(
-                    0, std::numeric_limits<uint32_t>::max())) {
+            randomInt(std::uniform_int_distribution<int32_t>(
+                    0, std::numeric_limits<int32_t>::max())) {
         /**
          * Fills the maze vector in storage with a set seed
          */
@@ -51,12 +51,12 @@ public:
         // Pick a random start and end that's an odd number
         // In a backtracking algorithm like this, an odd number is always
         // an open wall.
-        this->startPos = std::pair<uint32_t, uint32_t>{
+        this->startPos = std::pair<int32_t, int32_t>{
                 ((this->randomInt(this->rng) % x) / 2) * 2,
                 ((this->randomInt(this->rng) % y) / 2) * 2
         };
 
-        this->goalPos = std::pair<uint32_t, uint32_t>{
+        this->goalPos = std::pair<int32_t, int32_t>{
                 ((this->randomInt(this->rng) % x) / 2) * 2,
                 ((this->randomInt(this->rng) % y) / 2) * 2
         };
@@ -64,7 +64,7 @@ public:
         while (startPos == goalPos) {
             // In case it made the exact same number, keep trying to make
             // more until they're different
-            this->goalPos = std::pair<uint32_t, uint32_t>{
+            this->goalPos = std::pair<int32_t, int32_t>{
                     ((this->randomInt(this->rng) % x) / 2) * 2,
                     ((this->randomInt(this->rng) % y) / 2) * 2
             };
@@ -75,8 +75,8 @@ public:
                   "Finish " << goalPos.first << " " << goalPos.second <<
                   std::endl;
 
-        this->maze[startPos.second][startPos.first] = 'S';
-        this->maze[goalPos.second][goalPos.first] = 'G';
+        this->maze[startPos.first][startPos.second] = 'S';
+        this->maze[goalPos.first][goalPos.second] = 'G';
 
         generateMaze();
     }
@@ -84,7 +84,7 @@ public:
     /**
      * Fills the maze vector in storage with a random seed
      */
-    RecursiveBacktrackingMaze(uint32_t &xParameter, uint32_t &yParameter) :
+    RecursiveBacktrackingMaze(int32_t &xParameter, int32_t &yParameter) :
             RecursiveBacktrackingMaze(
                     xParameter, yParameter, time(nullptr)) {}
 
@@ -93,9 +93,9 @@ public:
         return maze;
     }
 
-    void printMaze(){
-        for(auto & line : this->maze){
-            for(auto & cell : line){
+    void printMaze() {
+        for (auto &line : this->maze) {
+            for (auto &cell : line) {
                 std::cout << cell;
             }
             std::cout << std::endl;
@@ -130,10 +130,10 @@ public:
     }
 
 private:
-    uint32_t x;
-    uint32_t y;
-    std::pair<uint32_t, uint32_t> startPos;
-    std::pair<uint32_t, uint32_t> goalPos;
+    int32_t x;
+    int32_t y;
+    std::pair<int32_t, int32_t> startPos;
+    std::pair<int32_t, int32_t> goalPos;
 
     /// The maze is represented as maze[y][x]
     std::vector<std::vector<char>> maze;
@@ -146,28 +146,31 @@ private:
     };
 
     std::default_random_engine rng;
-    std::uniform_int_distribution<uint32_t> randomInt;
+    std::uniform_int_distribution<int32_t> randomInt;
 
     void generateMaze() {
         /**
          * Sets the this->maze vector based on the current format
          */
-        std::stack<std::pair<uint32_t, uint32_t>> pathTaken;
+        std::stack<std::pair<int32_t, int32_t>> pathTaken;
         pathTaken.emplace(startPos);
         // Start pos should already be marked so no need to worry
         // about marking it
 
+        int32_t loops = 0;
         while (!pathTaken.empty()) {
+            printMaze();
+            std::cout << std::endl;
             auto &currentCell = pathTaken.top();
             auto adjacent = listSolidAdjacentCells(currentCell);
             while (adjacent.empty()) {
                 pathTaken.pop();
-                if(pathTaken.empty()) break;
+                if (pathTaken.empty()) break;
                 currentCell = pathTaken.top();
                 adjacent = listSolidAdjacentCells(currentCell);
             }
 
-            if(pathTaken.empty() && adjacent.empty()) break;
+            if (pathTaken.empty() && adjacent.empty()) break;
 
             uint8_t &&randomChoice = randomInt(rng) % adjacent.size();
             pathTaken.emplace(
@@ -180,15 +183,15 @@ private:
     }
 
     std::vector<std::pair<int8_t, int8_t>> listSolidAdjacentCells(
-            std::pair<uint32_t, uint32_t> coord) {
+            std::pair<int32_t, int32_t> coord) {
 
         std::vector<std::pair<int8_t, int8_t>> solidCells;
         for (auto &m : moves) {
-            auto adjacent = std::pair<uint32_t, uint32_t>{
-                    m.first + coord.first,
-                    m.second + coord.second
+            auto adjacent = std::pair<int32_t, int32_t>{
+                    (m.first * 2) + coord.first,
+                    (m.second * 2) + coord.second
             };
-            if (isSolid(adjacent)) {
+            if (isInBounds(adjacent) && !isClear(adjacent)) {
                 solidCells.emplace_back(m);
             }
         }
@@ -196,32 +199,37 @@ private:
     }
 
     void MoveTwoAndClear(
-            std::pair<uint32_t, uint32_t> coord,
+            std::pair<int32_t, int32_t> coord,
             std::pair<int8_t, int8_t> &movement) {
+        auto vectorCopy = this->maze;
+
         /// Marks two cells in front/behind of coord
-        for (int i = 0; i < 2; i++) {
-            coord.first += movement.first;
-            coord.second += movement.second;
-            if (isSolid(coord)) {
+        for (int i = 0; i < 3; i++) {
+            if (isInBounds(coord) &&
+                (this->maze[coord.first][coord.second] == 'H')) {
                 this->maze[coord.first][coord.second] = 'O';
             }
+            coord.first += movement.first;
+            coord.second += movement.second;
+        }
+
+        if (vectorCopy == this->maze) {
+            std::cout << "something is wrong" << std::endl;
         }
     }
 
-    bool isSolid(std::pair<uint32_t, uint32_t> coord) const {
-        /**
-         * Evaluates true when the cell is a wall and the coord is
-         * inside bounds
-         */
+    bool isInBounds(std::pair<int32_t, int32_t> &coord) const {
         if (coord.first >= x || coord.first < 0 ||
             coord.second >= y || coord.second < 0) {
             return false;
         }
+        return true;
+    }
 
-        if (maze[coord.first][coord.second] == 'O') {
+    bool isClear(std::pair<int32_t, int32_t> &coord) const {
+        if (maze[coord.first][coord.second] == 'H') {
             return false;
         }
-
         return true;
     }
 
@@ -233,8 +241,8 @@ int main(int argc, char **argv) {
         std::cerr << "ERROR: This function requires an x and y dimension for "
                      "maze size" << std::endl;
     }
-    uint32_t x = strtol(argv[1], nullptr, 10);
-    uint32_t y = strtol(argv[2], nullptr, 10);
+    int32_t x = strtol(argv[1], nullptr, 10);
+    int32_t y = strtol(argv[2], nullptr, 10);
 
     std::cout << "Starting..." << std::endl;
     auto maze = RecursiveBacktrackingMaze(x, y, 42);
