@@ -11,12 +11,10 @@
 #include <utility>
 #include <vector>
 #include <stack>
-#include <unordered_map>
-#include <unordered_set>
 #include <fstream>
 #include <cstdio>
 #include <random>
-
+#include <chrono>
 
 std::string currentDateTime() {
     time_t now = time(nullptr);
@@ -35,14 +33,6 @@ public:
             x(x), y(y), rng(std::default_random_engine(seed)),
             randomInt(std::uniform_int_distribution<int32_t>(
                     0, std::numeric_limits<int32_t>::max())) {
-        // TODO: Consider whether the map NEEDS to be even/odd
-//        if (this->x % 2 == 0) {
-//            this->x += 1;
-//        }
-//        if (this->x % 2 == 0) {
-//            this->x += 1;
-//        }
-
         /**
          * Fills the maze vector in storage with a set seed
          */
@@ -68,6 +58,9 @@ public:
                 ((this->randomInt(this->rng) % x) / 2) * 2,
                 ((this->randomInt(this->rng) % y) / 2) * 2
         };
+//
+//        this->startPos = std::pair<int32_t, int32_t>{2, 2};
+//        this->goalPos = std::pair<int32_t, int32_t>{46, 46};
 
         while (startPos == goalPos) {
             // In case it made the exact same number, keep trying to make
@@ -83,10 +76,14 @@ public:
                   "Finish " << goalPos.first << " " << goalPos.second <<
                   std::endl;
 
-        this->maze[startPos.first][startPos.second] = 'S';
-        this->maze[goalPos.first][goalPos.second] = 'G';
-
         generateMaze();
+
+        // Add the start and goal afterwards. This makes comparisons during
+        // that search easier/faster
+        this->maze[startPos.first][startPos.second] = 'S';
+        std::cout << "Goal " << goalPos.first << " " << goalPos.second <<
+                  std::endl;
+        this->maze[goalPos.first][goalPos.second] = 'G';
     }
 
     /**
@@ -104,7 +101,7 @@ public:
     void printMaze() {
         for (auto &line : this->maze) {
             for (auto &cell : line) {
-                std::cout << cell << " ";
+                std::cout << cell << "  ";
             }
             std::cout << std::endl;
         }
@@ -167,9 +164,9 @@ private:
 
         int32_t loops = 0;
         while (!pathTaken.empty()) {
-            printMaze();
-            std::cout << std::endl;
-            auto & currentCell = pathTaken.top();
+//            printMaze();
+//            std::cout << std::endl;
+            auto &currentCell = pathTaken.top();
             auto adjacent = listSolidAdjacentCells(currentCell);
             while (adjacent.empty()) {
                 pathTaken.pop();
@@ -198,7 +195,8 @@ private:
                     (m.first * 2) + coord.first,
                     (m.second * 2) + coord.second
             };
-            if (isInBounds(adjacent) && !isClear(adjacent)) {
+            if (isInBounds(adjacent) &&
+                this->maze[adjacent.first][adjacent.second] == 'H') {
                 solidCells.emplace_back(m);
             }
         }
@@ -208,20 +206,15 @@ private:
     void MoveTwoAndClear(
             std::pair<int32_t, int32_t> coord,
             std::pair<int8_t, int8_t> &movement) {
-        auto vectorCopy = this->maze;
-
         /// Marks two cells in front/behind of coord
-        for (int i = 0; i < 3; i++) {
-            if (isInBounds(coord) &&
-                (this->maze[coord.first][coord.second] == 'H')) {
-                this->maze[coord.first][coord.second] = 'O';
-            }
+        for (int i = 0; i < 2; i++) {
             coord.first += movement.first;
             coord.second += movement.second;
-        }
-
-        if (vectorCopy == this->maze) {
-            std::cout << "something is wrong" << std::endl;
+            if (isInBounds(coord) &&
+                (this->maze[coord.first][coord.second] == 'H')) {
+                this->maze[coord.first][coord.second] = ' ';
+//                        std::to_string(drawAll++ %10)[0];
+            }
         }
     }
 
@@ -233,14 +226,7 @@ private:
         return true;
     }
 
-    bool isClear(std::pair<int32_t, int32_t> &coord) const {
-        if (maze[coord.first][coord.second] == 'H') {
-            return false;
-        }
-        return true;
-    }
-
-
+    int drawAll{0};
 };
 
 int main(int argc, char **argv) {
@@ -252,9 +238,16 @@ int main(int argc, char **argv) {
     int32_t y = strtol(argv[2], nullptr, 10);
 
     std::cout << "Starting..." << std::endl;
-    auto maze = RecursiveBacktrackingMaze(x, y, 42);
-    maze.saveMaze();
-    maze.printMaze();
+    // TODO: 43 and commented startpos/goalpos crashes
+
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();
+    auto maze = RecursiveBacktrackingMaze(x, y);
+    end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+    std::cout << "finished computation at " << std::ctime(&end_time)
+              << "elapsed time: " << elapsed_seconds.count() << "s\n";
     std::cout << std::endl << "Done" << std::endl;
 
     return EXIT_SUCCESS;
