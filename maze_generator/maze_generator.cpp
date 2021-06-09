@@ -16,6 +16,10 @@
 #include <random>
 #include <chrono>
 
+#pragma comment(linker, "/STACK:10000000")
+#pragma comment(linker, "/HEAP:10000000")
+
+
 std::string currentDateTime() {
     time_t now = time(nullptr);
     const tm *timeStruct;
@@ -157,13 +161,15 @@ private:
         /**
          * Sets the this->maze vector based on the current format
          */
-        std::stack<std::pair<int32_t, int32_t>> pathTaken;
+        std::stack<std::pair<int32_t, int32_t>,
+                std::vector<std::pair<uint32_t, uint32_t>>> pathTaken;
         pathTaken.emplace(startPos);
         // Start pos should already be marked so no need to worry
         // about marking it
 
         int32_t loops = 0;
         while (!pathTaken.empty()) {
+//            std::cout << pathTaken.size() << std::endl;
 //            printMaze();
 //            std::cout << std::endl;
             auto &currentCell = pathTaken.top();
