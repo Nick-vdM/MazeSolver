@@ -35,6 +35,14 @@ public:
             x(x), y(y), rng(std::default_random_engine(seed)),
             randomInt(std::uniform_int_distribution<int32_t>(
                     0, std::numeric_limits<int32_t>::max())) {
+        // TODO: Consider whether the map NEEDS to be even/odd
+//        if (this->x % 2 == 0) {
+//            this->x += 1;
+//        }
+//        if (this->x % 2 == 0) {
+//            this->x += 1;
+//        }
+
         /**
          * Fills the maze vector in storage with a set seed
          */
@@ -96,7 +104,7 @@ public:
     void printMaze() {
         for (auto &line : this->maze) {
             for (auto &cell : line) {
-                std::cout << cell;
+                std::cout << cell << " ";
             }
             std::cout << std::endl;
         }
@@ -161,7 +169,7 @@ private:
         while (!pathTaken.empty()) {
             printMaze();
             std::cout << std::endl;
-            auto &currentCell = pathTaken.top();
+            auto & currentCell = pathTaken.top();
             auto adjacent = listSolidAdjacentCells(currentCell);
             while (adjacent.empty()) {
                 pathTaken.pop();
@@ -173,12 +181,11 @@ private:
             if (pathTaken.empty() && adjacent.empty()) break;
 
             uint8_t &&randomChoice = randomInt(rng) % adjacent.size();
+            MoveTwoAndClear(currentCell, adjacent[randomChoice]);
             pathTaken.emplace(
                     (2 * adjacent[randomChoice].first) + currentCell.first,
                     (2 * adjacent[randomChoice].second) + currentCell.second
             );
-
-            MoveTwoAndClear(currentCell, adjacent[randomChoice]);
         }
     }
 
