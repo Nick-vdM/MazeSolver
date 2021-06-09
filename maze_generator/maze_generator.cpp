@@ -7,6 +7,7 @@
 // https://www.gormanalysis.com/blog/random-numbers-in-cpp/
 
 #include <iostream>
+#include <cerrno>
 #include <ctime>
 #include <utility>
 #include <vector>
@@ -15,6 +16,7 @@
 #include <cstdio>
 #include <random>
 #include <chrono>
+#include <cstring>
 
 #pragma comment(linker, "/STACK:10000000")
 #pragma comment(linker, "/HEAP:10000000")
@@ -26,7 +28,7 @@ std::string currentDateTime() {
     char buffer[128];
     timeStruct = localtime(&now);
 
-    strftime(buffer, sizeof(buffer), "%y_%m_%d_%X", timeStruct);
+    strftime(buffer, sizeof(buffer), "_%y_%m_%d_%H%M%S", timeStruct);
 
     return buffer;
 }
@@ -41,8 +43,8 @@ public:
          * Fills the maze vector in storage with a set seed
          */
         // Start everything with walls - we'll be digging
-        std::vector<char> filler(this->x, 'H');
-        this->maze = std::vector<std::vector<char>>(this->y, filler);
+        std::vector<char> filler(this->y, 'H');
+        this->maze = std::vector<std::vector<char>>(this->x, filler);
 
         if (x < 2 && y < 2) {
             std::cerr << "WARNING: It is recommended that x and y are above 2"
@@ -53,18 +55,18 @@ public:
         // Pick a random start and end that's an odd number
         // In a backtracking algorithm like this, an odd number is always
         // an open wall.
-        this->startPos = std::pair<int32_t, int32_t>{
-                ((this->randomInt(this->rng) % x) / 2) * 2,
-                ((this->randomInt(this->rng) % y) / 2) * 2
-        };
-
-        this->goalPos = std::pair<int32_t, int32_t>{
-                ((this->randomInt(this->rng) % x) / 2) * 2,
-                ((this->randomInt(this->rng) % y) / 2) * 2
-        };
+//        this->startPos = std::pair<int32_t, int32_t>{
+//                ((this->randomInt(this->rng) % x) / 2) * 2,
+//                ((this->randomInt(this->rng) % y) / 2) * 2
+//        };
 //
-//        this->startPos = std::pair<int32_t, int32_t>{2, 2};
-//        this->goalPos = std::pair<int32_t, int32_t>{46, 46};
+//        this->goalPos = std::pair<int32_t, int32_t>{
+//                ((this->randomInt(this->rng) % x) / 2) * 2,
+//                ((this->randomInt(this->rng) % y) / 2) * 2
+//        };
+//
+        this->startPos = std::pair<int32_t, int32_t>{0, 0};
+        this->goalPos = std::pair<int32_t, int32_t>{248, 8};
 
         while (startPos == goalPos) {
             // In case it made the exact same number, keep trying to make
@@ -117,6 +119,7 @@ public:
         ofs.open(path);
         if (!ofs) {
             std::cerr << "Failed to open " << path << std::endl;
+            std::cerr << strerror(errno) << std::endl;
             return false;
         }
 
@@ -255,6 +258,8 @@ int main(int argc, char **argv) {
     std::cout << "finished computation at " << std::ctime(&end_time)
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
     std::cout << std::endl << "Done" << std::endl;
+
+    maze.saveMaze();
 
     return EXIT_SUCCESS;
 }
