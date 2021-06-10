@@ -55,18 +55,18 @@ public:
         // Pick a random start and end that's an odd number
         // In a backtracking algorithm like this, an odd number is always
         // an open wall.
-//        this->startPos = std::pair<int32_t, int32_t>{
-//                ((this->randomInt(this->rng) % x) / 2) * 2,
-//                ((this->randomInt(this->rng) % y) / 2) * 2
-//        };
-//
-//        this->goalPos = std::pair<int32_t, int32_t>{
-//                ((this->randomInt(this->rng) % x) / 2) * 2,
-//                ((this->randomInt(this->rng) % y) / 2) * 2
-//        };
-//
-        this->startPos = std::pair<int32_t, int32_t>{0, 0};
-        this->goalPos = std::pair<int32_t, int32_t>{248, 8};
+        this->startPos = std::pair<int32_t, int32_t>{
+                ((this->randomInt(this->rng) % x) / 2) * 2,
+                ((this->randomInt(this->rng) % y) / 2) * 2
+        };
+
+        this->goalPos = std::pair<int32_t, int32_t>{
+                ((this->randomInt(this->rng) % x) / 2) * 2,
+                ((this->randomInt(this->rng) % y) / 2) * 2
+        };
+
+//        this->startPos = std::pair<int32_t, int32_t>{0, 0};
+//        this->goalPos = std::pair<int32_t, int32_t>{248, 8};
 
         while (startPos == goalPos) {
             // In case it made the exact same number, keep trying to make
@@ -113,7 +113,7 @@ public:
         }
     }
 
-    bool saveMaze(const std::string &path) {
+    bool saveMazeToTxt(const std::string &path) {
         // TODO: May need revision on file format
         std::ofstream ofs;
         ofs.open(path);
@@ -133,12 +133,77 @@ public:
         return true;
     }
 
-    bool saveMaze() {
+    bool saveMazeToTxt() {
         /// Automatically picks a path under mazes/
         std::string pathName = "mazes/" + std::to_string(this->x) + 'x' +
                                std::to_string(this->y) +
                                currentDateTime() + ".txt";
-        return this->saveMaze(pathName);
+        return this->saveMazeToTxt(pathName);
+    }
+
+    bool saveMazeToCsp(const std::string &path) {
+        // TODO: May need revision on file format
+        std::ofstream ofs;
+        ofs.open(path);
+        if (!ofs) {
+            std::cerr << "Failed to open " << path << std::endl;
+            std::cerr << strerror(errno) << std::endl;
+            return false;
+        }
+
+        ofs << "#define NoOfRows " << this->x << std::endl;
+        ofs << "#define NoOfCols " << this->y << std::endl;
+        ofs << "var maze[NoOfRows][NoOfCols]:{0..3} = [";
+        size_t index = 0; // its impossible for 2^31^2 to overflow this
+        size_t maxIndex = (this->x * this->y);
+        std::cout << "max" << maxIndex << std::endl;
+        for (auto &row : maze) {
+            for (auto &c : row) {
+                switch (c) {
+                    case 'O':
+                        ofs << '0';
+                        break;
+                    case 'H':
+                        ofs << '1';
+                        break;
+                    case 'S':
+                        ofs << '2';
+                        break;
+                    case 'G':
+                        ofs << '3';
+                        break;
+                    default:
+                        std::cerr << "Something strange is in the maze"
+                                  << std::endl;
+                        break;
+                }
+                if(++index >= maxIndex) break;
+                ofs << ",";
+            }
+            ofs << std::endl << '\t';
+        }
+        // We could have done that last loop with an if condition in the middle,
+        // but frankly its going to be a hell of a lot easier to just delete
+        // that last comma
+
+        ofs << "];" << std::endl;
+
+        // When the file gets opened it should have a newline at the end for
+        // safety
+        ofs << "var pos[2]:{0.." << std::max(this->x, this->y)
+            << "} = [" << this->startPos.first << "," << this->startPos.second
+            << "];" << std::endl;
+
+        ofs.close();
+        return true;
+    }
+
+    bool saveMazeToCsp() {
+        /// Automatically picks a path under mazes/
+        std::string pathName = "mazes/" + std::to_string(this->x) + 'x' +
+                               std::to_string(this->y) +
+                               currentDateTime() + ".csp";
+        return this->saveMazeToCsp(pathName);
     }
 
 private:
@@ -221,7 +286,7 @@ private:
             coord.second += movement.second;
             if (isInBounds(coord) &&
                 (this->maze[coord.first][coord.second] == 'H')) {
-                this->maze[coord.first][coord.second] = ' ';
+                this->maze[coord.first][coord.second] = 'O';
 //                        std::to_string(drawAll++ %10)[0];
             }
         }
@@ -259,7 +324,8 @@ int main(int argc, char **argv) {
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
     std::cout << std::endl << "Done" << std::endl;
 
-    maze.saveMaze();
+    maze.saveMazeToTxt();
+    maze.saveMazeToCsp();
 
     return EXIT_SUCCESS;
 }
