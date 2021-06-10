@@ -151,12 +151,11 @@ public:
             return false;
         }
 
-        ofs << "#define NoOfRows " << this->x << std::endl;
-        ofs << "#define NoOfCols " << this->y << std::endl;
+        ofs << "#define NoOfRows " << this->x << ";" << std::endl;
+        ofs << "#define NoOfCols " << this->y << ";" << std::endl;
         ofs << "var maze[NoOfRows][NoOfCols]:{0..3} = [";
         size_t index = 0; // its impossible for 2^31^2 to overflow this
         size_t maxIndex = (this->x * this->y);
-        std::cout << "max" << maxIndex << std::endl;
         for (auto &row : maze) {
             for (auto &c : row) {
                 switch (c) {
@@ -177,7 +176,7 @@ public:
                                   << std::endl;
                         break;
                 }
-                if(++index >= maxIndex) break;
+                if (++index >= maxIndex) break;
                 ofs << ",";
             }
             ofs << std::endl << '\t';
@@ -304,10 +303,14 @@ private:
 };
 
 int main(int argc, char **argv) {
-    if (argc != 3) {
+    std::cout << "Please run this as ./program x y <filename>. Filename is "
+                 "optional";
+    if (argc < 3) {
         std::cerr << "ERROR: This function requires an x and y dimension for "
                      "maze size" << std::endl;
     }
+
+
     int32_t x = strtol(argv[1], nullptr, 10);
     int32_t y = strtol(argv[2], nullptr, 10);
 
@@ -324,8 +327,15 @@ int main(int argc, char **argv) {
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
     std::cout << std::endl << "Done" << std::endl;
 
-    maze.saveMazeToTxt();
-    maze.saveMazeToCsp();
+    if (argc == 4) {
+        // They want a filename
+        maze.saveMazeToTxt(std::string(argv[3]) + ".txt");
+        maze.saveMazeToCsp(std::string(argv[3]) + ".csp");
+    } else {
+        maze.saveMazeToTxt();
+        maze.saveMazeToCsp();
+    }
+
 
     return EXIT_SUCCESS;
 }
