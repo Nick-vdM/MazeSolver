@@ -1,9 +1,4 @@
-﻿///Ethan Lewis Maze Solevr
-
-//0 - Open spot
-//1 - Obstacle/w///Ethan Lewis Maze Solevr
-
-//0 - Open spot
+﻿//0 - Open spot
 //1 - Obstacle/wall
 //2 - Starting Location
 //3 - Goal
@@ -13,10 +8,13 @@
 
 //Move the current position up 1
 MoveUp() = moveupmaze{pos[0] = pos[0] - 1;}-> Move();
+
 //Move the current position down 1
 MoveDown() = movedown{pos[0] = pos[0] + 1;}-> Move();
+
 //Move the current position left 1
 MoveLeft() = moveleft{pos[1] = pos[1] - 1;}-> Move();
+
 //Move the current position right 1
 MoveRight() = moveright{pos[1] = pos[1] + 1;}-> Move();
 
@@ -25,9 +23,9 @@ MoveRight() = moveright{pos[1] = pos[1] + 1;}-> Move();
 
 
 //The task Move is the sequence of primitive tasks MoveUp, MoveDown, MoveLeft, MoveRight.
-Move() = [pos[0] != 0 && maze[pos[0]-1][pos[1]] != 1]MoveUp() [] 
-[pos[0] != NoOfCols - 1 && maze[pos[0]+1][pos[1]] != 1]MoveDown() []
- [pos[1] != 0  && maze[pos[0]][pos[1]-1] != 1]MoveLeft() [] 
- [pos[1] != NoOfRows - 1 && maze[pos[0]][pos[1]+1] != 1]MoveRight();
+Move() = [pos[0] != 0 &&            maze[pos[0]-1][pos[1]] != 1]MoveUp()   []
+         [pos[0] != NoOfCols - 1 && maze[pos[0]+1][pos[1]] != 1]MoveDown() []
+         [pos[1] != 0  &&           maze[pos[0]][pos[1]-1] != 1]MoveLeft() []
+         [pos[1] != NoOfRows - 1 && maze[pos[0]][pos[1]+1] != 1]MoveRight();
 
 #assert Move() reaches goalGoalFound;
