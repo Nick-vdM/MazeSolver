@@ -153,7 +153,7 @@ public:
 
         ofs << "#define NoOfRows " << this->x << ";" << std::endl;
         ofs << "#define NoOfCols " << this->y << ";" << std::endl;
-        ofs << "var maze[NoOfRows][NoOfCols]:{0..3} = [";
+        ofs << "var maze[NoOfRows][NoOfCols]:{0..4} = [";
         size_t index = 0; // its impossible for 2^31^2 to overflow this
         size_t maxIndex = (this->x * this->y);
         for (auto &row : maze) {
