@@ -2,7 +2,7 @@
 ## Main Script
 Essentially, we want a script that does this
 * Splits into n threads, and each has a unique name. On each thread:
-  * Run the maze generator with X $\times$ Y dimensions
+  * Run the maze generator with X * Y dimensions
   * Solve with CSP, record time and path taken
   * Solve with RL, record time and path taken
 * Average all the times together
