@@ -4,8 +4,6 @@
 //3 - Goal
 //4 - Spot already been
 
-#include "mazes\maze.csp";
-
 //Move the current position up 1 (subtract 1
 MoveUp() = moveup{maze[pos[0]][pos[1]] = 4; pos[0] = pos[0] - 1;}-> Move();
 

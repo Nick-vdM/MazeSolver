@@ -63,7 +63,7 @@ class Profiler:
         """
         model_out = 'temp/csp_out/' + self.filename + '.txt'
 
-        self.csp_time_verbose = os.system('PAT3.Console -engine ' +
+        self.csp_time_verbose = os.system('mono PAT3.Console -engine ' +
                                           str(self.engine), \
                                           self.csp_model,  model_out)
 
@@ -140,7 +140,6 @@ class ProfilerBuilder:
 
     def get_profiler(self):
         return profiler
-
 
 
 def extract_csp_profiles():
