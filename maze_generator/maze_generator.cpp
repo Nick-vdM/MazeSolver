@@ -125,7 +125,7 @@ public:
             return false;
         }
 
-        ofs << this->startPos.first << " " << this->startPos.first;
+        ofs << this->startPos.first << " " << this->startPos.second;
         ofs.close();
         return true;
     }

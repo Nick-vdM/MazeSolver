@@ -20,6 +20,7 @@ class Profiler:
         self._generate_csp_file()
         self._run_csp_file()
         self._run_RL_model()
+        self.delete_files = False
         if self.delete_files:
             self._delete_temp_files()
 
@@ -28,7 +29,6 @@ class Profiler:
         Initializes the temporary directory that everything 'temporary'
         will get thrown into
         """
-        # TODO: Change all of these paths into variables
         self._if_dir_not_exist_make('temp')
         self._if_dir_not_exist_make('temp/mazes')
         self._if_dir_not_exist_make('temp/csp_models')
@@ -39,14 +39,10 @@ class Profiler:
         self._if_dir_not_exist_make('profiles/rl')
 
     def _if_dir_not_exist_make(self, path):
-        print("testing", path)
         if not os.path.isdir(path):
-            print("Making", path)
-            os.mkdir(path)
+            os.makedirs(path)
 
     def _run_maze_gen(self):
-        # TODO: Change these os.system arguments to use f"" instead so its
-        # a bit more readable
         os.system('./' + self.maze_generator_path + ' ' +
                   str(self.X) + ' ' + str(self.Y) + ' temp/mazes/' + self.filename)
         self.csp_maze_path = 'temp/mazes/' + self.filename + '.csp'
@@ -58,8 +54,8 @@ class Profiler:
         Generates the CSP file by appending the model to the maze.csp file.
         """
         self.csp_model_and_maze = 'temp/csp_out/' + self.filename + '.csp'
-        os.system('cat ' + self.csp_maze_path + ' ' +
-                  self.csp_model + ' > ' +
+        os.system('cat ' + self.csp_maze_path + ' \"' +
+                  self.csp_model + '\" > ' +
                   self.csp_model_and_maze)
 
     def _run_csp_file(self):
@@ -72,13 +68,12 @@ class Profiler:
         # Note PAT is pretty silly. The input file is relative to the current
         # working directory and the output file is relative to the actual
         # executable. Which in our case, is at two different places.
-        model_out = '../temp/csp_out/' + self.filename + '.txt'
-        print(os.getcwd())
+        model_out = '../profiles/csp/' + self.filename + '_profile.txt'
         self.pat3_print = \
-           subprocess.run(['mono', '\"PAT3/Pat3.Console.exe\"',
+           subprocess.check_output(['mono', 'PAT3/Pat3.Console.exe',
                                     '-engine', str(self.engine),
-                                    self.csp_model, model_out])
-        print(self.pat3_print)
+                                    self.csp_model_and_maze, model_out])
+        print('test', self.pat3_print)
 
     def _run_RL_model(self):
         # TODO: Test whether this prints the start pos correctly
@@ -103,10 +98,11 @@ class Profiler:
         """
         Deletes the entire temporary directory
         """
-        try:
-            os.rmdir('temp')
-        except OSError as e:
-            print("Error: tried to delete temp", e.strerror)
+        for root, dirs, files in os.walk('temp', topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
 
 
 class ProfilerBuilder:
@@ -183,3 +179,4 @@ if __name__ == '__main__':
         .get_profiler()
 
     profiler.execute()
+    print("COMPLETED ALL PROFILING")
