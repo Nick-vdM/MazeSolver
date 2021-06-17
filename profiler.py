@@ -28,21 +28,18 @@ class Profiler:
         will get thrown into
         """
         # TODO: Change all of these paths into variables
-        if not os.path.isdir('temp'):
-            os.mkdir('temp')
-        if not os.path.isdir('temp/mazes'):
-            os.mkdir('temp/mazes')
-        if not os.path.isdir('temp/csp_models'):
-            os.mkdir('temp/csp_models')
-        if not os.path.isdir('temp/csp_out'):
-            os.mkdir('temp/csp_out')
+        self._if_dir_not_exist_make('temp')
+        self._if_dir_not_exist_make('temp/mazes')
+        self._if_dir_not_exist_make('temp/csp_models')
+        self._if_dir_not_exist_make('temp/csp_out')
 
-        if not os.path.isdir('profiles'):
-            os.mkdir('profiles')
-        if not os.path.isdir('profiles/csp'):
-            os.mkdir('profiles/csp')
-        if not os.path.isdir('profiles/rl'):
-            os.mkdir('profiles/rl')
+        self._if_dir_not_exist_make('profiles')
+        self._if_dir_not_exist_make('profiles/csp')
+        self._if_dir_not_exist_make('profiles/rl')
+
+    def _if_dir_not_exist_make(self, path):
+        if not os.path.isdir(path):
+            os.mkdir(path)
 
     def _run_maze_gen(self):
         os.system('./' + self.maze_generator_path,
@@ -59,20 +56,15 @@ class Profiler:
                     self.csp_model_and_maze)
 
     def _run_csp_file(self):
+        """
+        Just runs PAT3.Console. In theory the output file should have
+        everything we need
+        """
         model_out = 'temp/csp_out/' + self.filename + '.txt'
-        CSP_command = 'PAT3.Console -engine ' + str(self.engine), \
-                self.csp_model,  'temp/csp/'
-        self.csp_time_verbose = os.system('/usr/bin/time -v', CSP_command)
-        # Two ways to do this next step: Save this as a file and append,
-        # or append to this string and save. I'll do the former
 
-        csp_profile = 'profiles/csp_out/' + self.filename + '_profile.txt'
-        self._save_string_to_file(self.csp_model, 'profiles/csp/'\
-                                  + self.filename + '_profile.txt')
-
-        # TODO: Test if this append is doing the correct thing
-        # (might be backwards)
-        os.system('cat', model_out, '>>', csp_profile)
+        self.csp_time_verbose = os.system('PAT3.Console -engine ' +
+                                          str(self.engine), \
+                                          self.csp_model,  model_out)
 
     def _run_RL_model(self):
         # TODO Customise the RL parameters. I'm not sure what they are
