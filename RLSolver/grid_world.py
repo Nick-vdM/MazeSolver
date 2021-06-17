@@ -43,7 +43,6 @@ class GridWorld:
     def __init__(self, fn):
         # read a map from a file
         self._map = self.read_map(fn)
-        print(self._map)
         self._size = np.asarray(self._map.shape)
         self.goal_pos = np.where(self._map == 'G')
 

@@ -4,6 +4,7 @@ import subprocess
 
 class Profiler:
     def __init__(self):
+        # All of the default values in case the builder messes up
         self.filename = ''
         self.delete_files = True
         self.RL_model = 0
@@ -12,7 +13,6 @@ class Profiler:
         self.X = 50
         self.Y = 50
         self.csp_model = 'PAT Solver/mazeSolverModularMark.csp'
-        pass
 
     def execute(self):
         self._init_dirs()
@@ -163,7 +163,7 @@ if __name__ == '__main__':
     # NOTE: If you're running this on windows, you'll have to swap the
     # maze_generator path. This can probably just get changed to a program
     # argument
-    for i in range(5, 500, 15):
+    for i in range(5, 506, 10):
         print("Doing", i)
         profiler = ProfilerBuilder()              \
             .set_filename(str(i))                 \

@@ -49,7 +49,7 @@ def plot_train(agent, rtrace, steps, trace, start):
 if __name__ == '__main__':
     """
     This program has a couple of arguments settings
-    length = 0 : Fails
+    length = 0-2 : Fails
     Length = 3 : maze_file_path, start position
     length = 4 : maze_file_path, start position, maximum steps
     length = 8 :
@@ -68,28 +68,32 @@ if __name__ == '__main__':
               "Please do python3 RLSolver <mazelocation.txt> startY, startX")
         exit(1)
 
-    print("RL Script to open", sys.argv[0])
+    print("RL Script to open", sys.argv[1])
 
-    env = GridWorld(sys.argv[0])
+    env = GridWorld(sys.argv[1])
+    print("Printing the map")
     env.print_map()
+    print("Moving on")
 
     agent = RLAgent(env)
-    start = [int(sys.argv[1], int(sys.argv[2]))]
+    print("arguments are", sys.argv)
+    start = [int(sys.argv[2]), int(sys.argv[3])]
+    
 
-    if len(sys.argv == 3):
+    if len(sys.argv) == 3:
         rtrace, steps, trace = agent.train(start,
                                            gamma=0.99,
                                            alpha=0.1,
                                            epsilon=0.1,
                                            maxiter=100,
-                                           maxstep=sys.argv[4])
+                                           maxstep=sys.argv[5])
     elif len(sys.argv) == 7:
         rtrace, steps, trace = agent.train(start,
-                                           gamma=sys.argv[3],
-                                           alpha=sys.argv[4],
-                                           epsilon=sys.argv[5],
-                                           maxiter=sys.argv[6],
-                                           maxstep=sys.argv[7])
+                                           gamma=sys.argv[4],
+                                           alpha=sys.argv[5],
+                                           epsilon=sys.argv[6],
+                                           maxiter=sys.argv[7],
+                                           maxstep=sys.argv[8])
     else:
         rtrace, steps, trace = agent.train(start,
                                         gamma=0.99,
