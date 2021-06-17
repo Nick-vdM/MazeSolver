@@ -142,6 +142,11 @@ public:
 
         for (auto &row : maze) {
             for (auto &c : row) {
+                if (c == 'S'){
+                  // Its just that value for the CSP, so print 'O' instead
+                  ofs << 'O';
+                  continue;
+                }
                 ofs << c;
             }
             ofs << std::endl;

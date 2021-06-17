@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 
 
 class Profiler:
@@ -70,7 +71,6 @@ class Profiler:
            subprocess.check_output(['mono', 'PAT3/Pat3.Console.exe',
                                     '-engine', str(self.engine),
                                     self.csp_model_and_maze, model_out])
-        print('test', self.pat3_print)
 
     def _run_RL_model(self):
         # TODO: Test whether this prints the start pos correctly
@@ -79,7 +79,8 @@ class Profiler:
         split_start = start_pos.split(' ')
         self.rl_time_verbose = subprocess.run([
             '/usr/bin/time', '-v', 'python3',
-            self.RL_model, split_start[0], split_start[1]
+            self.RL_model, self.txt_maze_path,
+            split_start[0], split_start[1]
         ], capture_output=True)
 
         self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/'\
