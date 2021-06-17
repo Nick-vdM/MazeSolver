@@ -50,43 +50,43 @@ if __name__ == '__main__':
     """
     This program has a couple of arguments settings
     length = 0 : Fails
-    Length = 2 : maze_file_path, start position
-    length = 3 : maze_file_path, start position, maximum steps
-    length = 7 :
-            1 : maze_file_path,
-            2: start position
+    Length = 3 : maze_file_path, start position
+    length = 4 : maze_file_path, start position, maximum steps
+    length = 8 :
+            0 : maze_file_path,
+            1: start position Y  | --> Note: [Y, X] is the position
+            2: start position X  |
             3: gamma
             4: alpha
             5: epsilon
             6: max iterations
             7: maximum steps
     """
-    if len(sys.arv) == 0:
+    if len(sys.arv) < 3:
         print("I need to know where the maze is and what its called!"\
-              "Please do python3 RLSolver <mazelocation.txt> [Y, X]")
-    if len(sys.argv) == 2:
-        maze_location = sys.argv[0]
-        start_location = sys.argv[1]
+              "Please do python3 RLSolver <mazelocation.txt> startY, startX")
+        exit(1)
+
     env = GridWorld(sys.argv[0])
     env.print_map()
 
     agent = RLAgent(env)
-    start = [8,2]
+    start = [int(sys.argv[1], int(sys.argv[2]))]
+
     if len(sys.argv == 3):
         rtrace, steps, trace = agent.train(start,
                                            gamma=0.99,
                                            alpha=0.1,
                                            epsilon=0.1,
                                            maxiter=100,
-                                           maxstep=sys.argv[3])
+                                           maxstep=sys.argv[4])
     elif len(sys.argv) == 7:
         rtrace, steps, trace = agent.train(start,
-                                           gamma=sys.argv[2],
-                                           alpha=sys.argv[3],
-                                           epsilon=sys.argv[4],
-                                           maxiter=sys.argv[5],
-                                           maxstep=sys.argv[6])
-        )
+                                           gamma=sys.argv[3],
+                                           alpha=sys.argv[4],
+                                           epsilon=sys.argv[5],
+                                           maxiter=sys.argv[6],
+                                           maxstep=sys.argv[7])
     else:
         rtrace, steps, trace = agent.train(start,
                                         gamma=0.99,

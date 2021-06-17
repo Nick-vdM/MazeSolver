@@ -113,6 +113,23 @@ public:
         }
     }
 
+    bool saveStartPosToTxt(const std::string &path) {
+        /**
+         * You probably only care about this if you specified the filename
+         */
+        std::ofstream ofs;
+        ofs.open(path);
+        if (!ofs) {
+            std::cerr << "Failed to open " << path << std::endl;
+            std::cerr << strerror(errno) << std::endl;
+            return false;
+        }
+
+        ofs << this->startPos.first << " " << this->startPos.first;
+        ofs.close();
+        return true;
+    }
+
     bool saveMazeToTxt(const std::string &path) {
         // TODO: May need revision on file format
         std::ofstream ofs;
@@ -329,6 +346,7 @@ int main(int argc, char **argv) {
 
     if (argc == 4) {
         // They want a filename
+        maze.saveStartPosToTxt(std::string(argv[3]) + "_startpos.txt");
         maze.saveMazeToTxt(std::string(argv[3]) + ".txt");
         maze.saveMazeToCsp(std::string(argv[3]) + ".csp");
     } else {
