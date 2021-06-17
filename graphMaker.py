@@ -6,6 +6,68 @@ from datetime import datetime
 random.seed(datetime.now())
 
 
+def rolling_check_stderr(string: str):
+    time = ""
+    mem = ""
+
+    for idx in range(len(string)):
+        if string[idx] == "U":
+            if string[idx:idx+18] == "Usertime(seconds):":
+                for char in string[idx+18:]:
+                    if char == '\\':
+                        break
+                    else:
+                        time += char
+
+        if string[idx] == "M":
+            if string[idx:idx+31] == "Maximumresidentsetsize(kbytes):":
+                for char in string[idx+31:]:
+                    if char == "\\":
+                        break
+                    else:
+                        mem += char
+
+    return float(time), int(mem)
+
+
+def read_rl_file(filename):
+    file = open(filename, "r")
+
+    stdout = ""
+    stderr = ""
+
+    out_hit = False
+    err_hit = False
+    for line in file:
+        separated = line.split(sep=" ")
+        for word in separated:
+            if word[:6] == "stdout":
+                stdout = word
+                out_hit = True
+            elif word[:6] == "stderr":
+                err_hit = True
+                stderr = word
+            elif out_hit and not err_hit:
+                stdout += word
+            else:
+                stderr += word
+
+    return stdout, stderr
+
+time_arr = []
+mem_arr = []
+size_arr = []
+
+for i in range(5, 325, 10):
+    out, err = read_rl_file(f"profiles/rl/{i}")
+    time, mem = rolling_check_stderr(err)
+    time_arr.append(time)
+    mem_arr.append(mem)
+    size_arr.append(i)
+
+for i in range(len(time_arr)):
+    print(f"({size_arr[i]}, {time_arr[i]}, {mem_arr[i]})")
+
 #Size
 x = [] 
 for i in range(0,10000):

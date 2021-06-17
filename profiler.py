@@ -68,7 +68,7 @@ class Profiler:
         # executable. Which in our case, is at two different places.
         model_out = '../profiles/csp/' + self.filename
         self.pat3_print = \
-           subprocess.check_output(['mono', 'PAT3/Pat3.Console.exe',
+           subprocess.check_output(['mono', 'PAT3/PAT3.Console.exe',
                                     '-engine', str(self.engine),
                                     self.csp_model_and_maze, model_out])
 
