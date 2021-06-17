@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 
 class Profiler:
@@ -38,48 +39,64 @@ class Profiler:
         self._if_dir_not_exist_make('profiles/rl')
 
     def _if_dir_not_exist_make(self, path):
+        print("testing", path)
         if not os.path.isdir(path):
+            print("Making", path)
             os.mkdir(path)
 
     def _run_maze_gen(self):
-        os.system('./' + self.maze_generator_path,
-                  self.X, self.Y, 'temp/mazes/' + self.filename)
+        # TODO: Change these os.system arguments to use f"" instead so its
+        # a bit more readable
+        os.system('./' + self.maze_generator_path + ' ' +
+                  str(self.X) + ' ' + str(self.Y) + ' temp/mazes/' + self.filename)
         self.csp_maze_path = 'temp/mazes/' + self.filename + '.csp'
         self.txt_maze_path = 'temp/mazes/' + self.filename + '.txt'
         self.txt_start_pos = 'temp/mazes/' + self.filename + '_startpos.txt'
 
     def _generate_csp_file(self):
         """
-        Generates the CSP file by appending the model to the maze.csp file
+        Generates the CSP file by appending the model to the maze.csp file.
         """
-        self.csp_model_and_maze = 'temp/csp/' + self.filename + '.csp'
-        os.system('cat', self.csp_maze_path, self.csp_model, '>',
-                    self.csp_model_and_maze)
+        self.csp_model_and_maze = 'temp/csp_out/' + self.filename + '.csp'
+        os.system('cat ' + self.csp_maze_path + ' ' +
+                  self.csp_model + ' > ' +
+                  self.csp_model_and_maze)
 
     def _run_csp_file(self):
         """
         Just runs PAT3.Console. In theory the output file should have
-        everything we need
+        everything we need. Note, this requires the mono package which you can
+        download like this:
+        https://www.mono-project.com/download/stable/#download-lin
         """
-        model_out = 'temp/csp_out/' + self.filename + '.txt'
-
-        self.csp_time_verbose = os.system('mono PAT3.Console -engine ' +
-                                          str(self.engine), \
-                                          self.csp_model,  model_out)
+        # Note PAT is pretty silly. The input file is relative to the current
+        # working directory and the output file is relative to the actual
+        # executable. Which in our case, is at two different places.
+        model_out = '../temp/csp_out/' + self.filename + '.txt'
+        print(os.getcwd())
+        self.pat3_print = \
+           subprocess.run(['mono', '\"PAT3/Pat3.Console.exe\"',
+                                    '-engine', str(self.engine),
+                                    self.csp_model, model_out])
+        print(self.pat3_print)
 
     def _run_RL_model(self):
         # TODO: Test whether this prints the start pos correctly
         with open(self.txt_start_pos, 'r') as f:
             start_pos = f.read()
 
-        RL_command = 'python3 ' + self.RL_model, self.txt_maze_path, start_pos
-        self.rl_time_verbose = os.system('/usr/bin/time -v', RL_command)
+        RL_command = 'python3 ' + self.RL_model + ' ' + \
+                     self.txt_maze_path + ' ' + \
+                     start_pos
+        self.rl_time_verbose = subprocess.run([
+            '/usr/bin/time', '-v', RL_command
+        ], capture_output=True)
 
         self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/'\
                                   + self.filename + '_profile.txt')
 
     def _save_string_to_file(self, string, filepath):
-        f = open(filepath)
+        f = open(filepath, 'wt')
         print(string, file=f)
 
     def _delete_temp_files(self):
@@ -101,7 +118,7 @@ class ProfilerBuilder:
         # Set everything to defaults
         self.set_filename('maze') \
             .set_delete_temp_files(True) \
-            .set_RL_model() \
+            .set_RL_model('RLSolver/rl_script.py') \
             .set_maze_generator_path('maze_generator/maze_generator')
 
     def set_filename(self, filename):
@@ -139,19 +156,19 @@ class ProfilerBuilder:
         return self
 
     def get_profiler(self):
-        return profiler
+        return self._profiler
 
 
-def extract_csp_profiles():
+def extract_csp_profiles(csp_profile_directory):
     pass
 
-def extract_RL_profiles():
+def extract_RL_profiles(RL_profile_directory):
     pass
 
-def extract_profile_dirs():
+def extract_profile_dirs(main_directory):
     # TODO: Open all of the profile directories and save them as a single
     # file with the format of
-    # X, Y: time, memory used\n ...
+    # dict{'XShape, YShape' : [path length, time to solve in seconds, memory used in MB]}
     pass
 
 if __name__ == '__main__':
@@ -161,8 +178,8 @@ if __name__ == '__main__':
     # argument
     profiler = ProfilerBuilder() \
         .set_filename('maze') \
-        .set_RL_model() \
-        .set_engine('DFS') \
+        .set_RL_model('RLSolver/rl_script.py') \
+        .set_csp_engine('DFS') \
         .get_profiler()
 
     profiler.execute()
