@@ -60,12 +60,15 @@ if __name__ == '__main__':
             4: alpha
             5: epsilon
             6: max iterations
-            7: maximum steps
+
+    7: maximum steps
     """
-    if len(sys.arv) < 3:
+    if len(sys.argv) < 3:
         print("I need to know where the maze is and what its called!"\
               "Please do python3 RLSolver <mazelocation.txt> startY, startX")
         exit(1)
+
+    print("RL Script to open", sys.argv[0])
 
     env = GridWorld(sys.argv[0])
     env.print_map()
@@ -95,5 +98,7 @@ if __name__ == '__main__':
                                         maxiter=100,
                                         maxstep=1000)
 
-    plot_train(agent, rtrace, steps, trace, start)
+    print("Steps taken:", len(steps))
+
+    #plot_train(agent, rtrace, steps, trace, start)
 

@@ -22,6 +22,7 @@ class GridWorld:
             print env.next(1)  # right
             print env.next(3)  # down
             print env.next(0)  # left
+
             print env.next(2)  # up
             print env.next(2)  # up
 
@@ -42,6 +43,7 @@ class GridWorld:
     def __init__(self, fn):
         # read a map from a file
         self._map = self.read_map(fn)
+        print(self._map)
         self._size = np.asarray(self._map.shape)
         self.goal_pos = np.where(self._map == 'G')
 

@@ -20,9 +20,6 @@ class Profiler:
         self._generate_csp_file()
         self._run_csp_file()
         self._run_RL_model()
-        self.delete_files = False
-        if self.delete_files:
-            self._delete_temp_files()
 
     def _init_dirs(self):
         """
@@ -68,7 +65,7 @@ class Profiler:
         # Note PAT is pretty silly. The input file is relative to the current
         # working directory and the output file is relative to the actual
         # executable. Which in our case, is at two different places.
-        model_out = '../profiles/csp/' + self.filename + '_profile.txt'
+        model_out = '../profiles/csp/' + self.filename
         self.pat3_print = \
            subprocess.check_output(['mono', 'PAT3/Pat3.Console.exe',
                                     '-engine', str(self.engine),
@@ -79,30 +76,19 @@ class Profiler:
         # TODO: Test whether this prints the start pos correctly
         with open(self.txt_start_pos, 'r') as f:
             start_pos = f.read()
-
-        RL_command = 'python3 ' + self.RL_model + ' ' + \
-                     self.txt_maze_path + ' ' + \
-                     start_pos
+        split_start = start_pos.split(' ')
         self.rl_time_verbose = subprocess.run([
-            '/usr/bin/time', '-v', RL_command
+            '/usr/bin/time', '-v', 'python3',
+            self.RL_model, split_start[0], split_start[1]
         ], capture_output=True)
 
         self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/'\
-                                  + self.filename + '_profile.txt')
+                                  + self.filename)
 
     def _save_string_to_file(self, string, filepath):
         f = open(filepath, 'wt')
         print(string, file=f)
 
-    def _delete_temp_files(self):
-        """
-        Deletes the entire temporary directory
-        """
-        for root, dirs, files in os.walk('temp', topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
 
 
 class ProfilerBuilder:
@@ -113,7 +99,6 @@ class ProfilerBuilder:
         self._profiler = Profiler()
         # Set everything to defaults
         self.set_filename('maze') \
-            .set_delete_temp_files(True) \
             .set_RL_model('RLSolver/rl_script.py') \
             .set_maze_generator_path('maze_generator/maze_generator')
 
@@ -128,10 +113,6 @@ class ProfilerBuilder:
     def set_maze_XY(self, X, Y):
         self._profiler.X = X
         self._profiler.Y = Y
-        return self
-
-    def set_delete_temp_files(self, delete_files):
-        self._profiler.delete_files = delete_files
         return self
 
     def set_RL_model(self, RL_model):
@@ -167,16 +148,31 @@ def extract_profile_dirs(main_directory):
     # dict{'XShape, YShape' : [path length, time to solve in seconds, memory used in MB]}
     pass
 
+def delete_directory(directory):
+    """
+    Deletes the entire temporary directory
+    """
+    for root, dirs, files in os.walk(directory, topdown=False):
+        for name in files:
+            os.remove(os.path.join(root, name))
+        for name in dirs:
+            os.rmdir(os.path.join(root, name))
+
 if __name__ == '__main__':
     # For now I'm just going to initialise a basic one
     # NOTE: If you're running this on windows, you'll have to swap the
     # maze_generator path. This can probably just get changed to a program
     # argument
-    profiler = ProfilerBuilder() \
-        .set_filename('maze') \
-        .set_RL_model('RLSolver/rl_script.py') \
-        .set_csp_engine('DFS') \
-        .get_profiler()
+    for i in range(5, 500, 15):
+        print("Doing", i)
+        profiler = ProfilerBuilder()              \
+            .set_filename(str(i))                 \
+            .set_RL_model('RLSolver/rl_script.py')\
+            .set_maze_XY(i, i)                  \
+            .set_csp_engine('DFS')                \
+            .get_profiler()
 
-    profiler.execute()
+        profiler.execute()
     print("COMPLETED ALL PROFILING")
+
+    delete_directory('temp')
