@@ -46,6 +46,7 @@ class Profiler:
                   self.X, self.Y, 'temp/mazes/' + self.filename)
         self.csp_maze_path = 'temp/mazes/' + self.filename + '.csp'
         self.txt_maze_path = 'temp/mazes/' + self.filename + '.txt'
+        self.txt_start_pos = 'temp/mazes/' + self.filename + '_startpos.txt'
 
     def _generate_csp_file(self):
         """
@@ -67,8 +68,11 @@ class Profiler:
                                           self.csp_model,  model_out)
 
     def _run_RL_model(self):
-        # TODO Customise the RL parameters. I'm not sure what they are
-        RL_command = 'python3 ' + self.RL_model
+        # TODO: Test whether this prints the start pos correctly
+        with open(self.txt_start_pos, 'r') as f:
+            start_pos = f.read()
+
+        RL_command = 'python3 ' + self.RL_model, self.txt_maze_path, start_pos
         self.rl_time_verbose = os.system('/usr/bin/time -v', RL_command)
 
         self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/'\
@@ -137,6 +141,19 @@ class ProfilerBuilder:
     def get_profiler(self):
         return profiler
 
+
+
+def extract_csp_profiles():
+    pass
+
+def extract_RL_profiles():
+    pass
+
+def extract_profile_dirs():
+    # TODO: Open all of the profile directories and save them as a single
+    # file with the format of
+    # X, Y: time, memory used\n ...
+    pass
 
 if __name__ == '__main__':
     # For now I'm just going to initialise a basic one
