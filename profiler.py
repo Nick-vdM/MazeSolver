@@ -27,12 +27,15 @@ class Profiler:
         Initializes the temporary directory that everything 'temporary'
         will get thrown into
         """
+        # TODO: Change all of these paths into variables
         if not os.path.isdir('temp'):
             os.mkdir('temp')
         if not os.path.isdir('temp/mazes'):
             os.mkdir('temp/mazes')
-        if not os.path.isdir('temp/csp'):
-            os.mkdir('temp/csp')
+        if not os.path.isdir('temp/csp_models'):
+            os.mkdir('temp/csp_models')
+        if not os.path.isdir('temp/csp_out'):
+            os.mkdir('temp/csp_out')
 
         if not os.path.isdir('profiles'):
             os.mkdir('profiles')
@@ -56,20 +59,32 @@ class Profiler:
                     self.csp_model_and_maze)
 
     def _run_csp_file(self):
+        model_out = 'temp/csp_out/' + self.filename + '.txt'
         CSP_command = 'PAT3.Console -engine ' + str(self.engine), \
-                self.csp_model, ''
+                self.csp_model,  'temp/csp/'
         self.csp_time_verbose = os.system('/usr/bin/time -v', CSP_command)
+        # Two ways to do this next step: Save this as a file and append,
+        # or append to this string and save. I'll do the former
+
+        csp_profile = 'profiles/csp_out/' + self.filename + '_profile.txt'
+        self._save_string_to_file(self.csp_model, 'profiles/csp/'\
+                                  + self.filename + '_profile.txt')
+
+        # TODO: Test if this append is doing the correct thing
+        # (might be backwards)
+        os.system('cat', model_out, '>>', csp_profile)
 
     def _run_RL_model(self):
         # TODO Customise the RL parameters. I'm not sure what they are
         RL_command = 'python3 ' + self.RL_model
         self.rl_time_verbose = os.system('/usr/bin/time -v', RL_command)
 
-        self._save_string_to_file(self.rl_time_verbose, '')
+        self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/'\
+                                  + self.filename + '_profile.txt')
 
-    def _save_string_to_file(self, string, file):
-        #TODO
-        pass
+    def _save_string_to_file(self, string, filepath):
+        f = open(filepath)
+        print(string, file=f)
 
     def _delete_temp_files(self):
         """
