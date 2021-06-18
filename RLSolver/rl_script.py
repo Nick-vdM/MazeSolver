@@ -80,7 +80,7 @@ if __name__ == '__main__':
     start = [int(sys.argv[2]), int(sys.argv[3])]
     
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 5:
         rtrace, steps, trace = agent.train(start,
                                            gamma=0.99,
                                            alpha=0.1,
@@ -102,7 +102,9 @@ if __name__ == '__main__':
                                         maxiter=100,
                                         maxstep=1000)
 
-    print("Steps taken:", len(steps))
+    # print("Steps taken:", len(steps))
 
-    #plot_train(agent, rtrace, steps, trace, start)
+    # plot_train(agent, rtrace, steps, trace, start)
+    test_path = agent.test(start)
+    print(f"Steps: {len(test_path)}\nPath: {test_path}")
 
