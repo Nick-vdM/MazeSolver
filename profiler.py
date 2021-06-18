@@ -2,6 +2,9 @@ import os
 import subprocess
 import sys
 
+manual_run_bat = True
+regen_mazes = True
+
 
 class Profiler:
     def __init__(self):
@@ -17,9 +20,13 @@ class Profiler:
 
     def execute(self):
         self._init_dirs()
+        print("Generating maze")
         self._run_maze_gen()
         self._generate_csp_file()
-        self._run_csp_file()
+        if not manual_run_bat:
+            print("Running CSP")
+            self._run_csp_file()
+        print("Running RL")
         self._run_RL_model()
 
     def _init_dirs(self):
@@ -41,8 +48,9 @@ class Profiler:
             os.makedirs(path)
 
     def _run_maze_gen(self):
-        os.system('./' + self.maze_generator_path + ' ' +
-                  str(self.X) + ' ' + str(self.Y) + ' temp/mazes/' + self.filename)
+        if regen_mazes:
+            os.system('./' + self.maze_generator_path + ' ' + str(self.X) + ' ' + str(
+                self.Y) + ' temp/mazes/' + self.filename)
         self.csp_maze_path = 'temp/mazes/' + self.filename + '.csp'
         self.txt_maze_path = 'temp/mazes/' + self.filename + '.txt'
         self.txt_start_pos = 'temp/mazes/' + self.filename + '_startpos.txt'
@@ -68,9 +76,9 @@ class Profiler:
         # executable. Which in our case, is at two different places.
         model_out = '../profiles/csp/' + self.filename
         self.pat3_print = \
-           subprocess.check_output(['mono', 'PAT3/PAT3.Console.exe',
-                                    '-engine', str(self.engine),
-                                    self.csp_model_and_maze, model_out])
+            subprocess.check_output(['mono', 'PAT3/PAT3.Console.exe',
+                                     '-engine', str(self.engine),
+                                     self.csp_model_and_maze, model_out])
 
     def _run_RL_model(self):
         # TODO: Test whether this prints the start pos correctly
@@ -83,7 +91,7 @@ class Profiler:
             split_start[0], split_start[1]
         ], capture_output=True)
 
-        self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/'\
+        self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/' \
                                   + self.filename)
 
     def _save_string_to_file(self, string, filepath):
@@ -91,11 +99,11 @@ class Profiler:
         print(string, file=f)
 
 
-
 class ProfilerBuilder:
     """
     Generates a profiler
     """
+
     def __init__(self):
         self._profiler = Profiler()
         # Set everything to defaults
@@ -140,14 +148,17 @@ class ProfilerBuilder:
 def extract_csp_profiles(csp_profile_directory):
     pass
 
+
 def extract_RL_profiles(RL_profile_directory):
     pass
+
 
 def extract_profile_dirs(main_directory):
     # TODO: Open all of the profile directories and save them as a single
     # file with the format of
     # dict{'XShape, YShape' : [path length, time to solve in seconds, memory used in MB]}
     pass
+
 
 def delete_directory(directory):
     """
@@ -159,6 +170,7 @@ def delete_directory(directory):
         for name in dirs:
             os.rmdir(os.path.join(root, name))
 
+
 if __name__ == '__main__':
     # For now I'm just going to initialise a basic one
     # NOTE: If you're running this on windows, you'll have to swap the
@@ -166,14 +178,18 @@ if __name__ == '__main__':
     # argument
     for i in range(5, 506, 10):
         print("Doing", i)
-        profiler = ProfilerBuilder()              \
-            .set_filename(str(i))                 \
-            .set_RL_model('RLSolver/rl_script.py')\
-            .set_maze_XY(i, i)                  \
-            .set_csp_engine('DFS')                \
+        profiler = ProfilerBuilder() \
+            .set_filename(str(i)) \
+            .set_RL_model('RLSolver/rl_script.py') \
+            .set_maze_XY(i, i) \
+            .set_csp_engine('DFS') \
             .get_profiler()
 
         profiler.execute()
     print("COMPLETED ALL PROFILING")
+    if manual_run_bat:
+        print("Temp files have been left to allow the PAT loop batch file to run.")
+        print("Delete contents of temp directory when PAT loop has been run and completed.")
 
-    delete_directory('temp')
+    if not manual_run_bat:
+        delete_directory('temp')

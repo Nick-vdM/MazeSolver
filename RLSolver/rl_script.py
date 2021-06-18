@@ -96,12 +96,12 @@ if __name__ == '__main__':
                                            maxstep=sys.argv[8])
     else:
         rtrace, steps, trace = agent.train(start,
-                                        gamma=0.99,
-                                        alpha=0.1,
-                                        epsilon=0.1,
-                                        maxiter=100,
-                                        maxstep=1000)
-
+                                        # gamma=0.99,
+                                        # alpha=0.1,
+                                        # epsilon=0.1,
+                                        # maxiter=100,
+                                        # maxstep=1000)
+                                        )
     # print("Steps taken:", len(steps))
 
     # plot_train(agent, rtrace, steps, trace, start)

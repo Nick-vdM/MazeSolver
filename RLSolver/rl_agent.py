@@ -2,8 +2,8 @@ import numpy as np
 
 # top-left to (0,0)
 def coord_convert(s, sz):
-    return [s[1], sz[0]-s[0]-1]
-
+    # return [s[1], sz[0]-s[0]-1]
+    return s
 
 class RLAgent:
     """
@@ -32,8 +32,8 @@ class RLAgent:
 
         # parameters
         gamma = params.pop('gamma', 0.99)
-        alpha = params.pop('alpha', 0.1)
-        epsilon = params.pop('epsilon', 0.1)
+        alpha = params.pop('alpha', 0.8)
+        epsilon = params.pop('epsilon', 0.6)
         maxiter = params.pop('maxiter', 1000)
         maxstep = params.pop('maxstep', 1000)
 
