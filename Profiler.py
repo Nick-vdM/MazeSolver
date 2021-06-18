@@ -7,16 +7,21 @@ regen_mazes = True
 
 
 class Profiler:
-    def __init__(self):
+    def __init__(self, filename='maze',
+                 RL_model='RLSolver/rl_script.py',
+                 engine=0,  # DFS
+                 maze_generator_path='maze_generator/maze_generator',
+                 X=50,
+                 Y=50,
+                 csp_model='PAT Solver/mazeSolverModularMark.csp'):
         # All of the default values in case the builder messes up
-        self.filename = ''
-        self.delete_files = True
-        self.RL_model = 0
-        self.engine = 0
-        self.maze_generator_path = 'maze_generator/maze_generator'
-        self.X = 50
-        self.Y = 50
-        self.csp_model = 'PAT Solver/mazeSolverModularMark.csp'
+        self.filename = filename
+        self.RL_model = RL_model
+        self.engine = engine
+        self.maze_generator_path = maze_generator_path
+        self.X = X
+        self.Y = Y
+        self.csp_model = csp_model
 
     def execute(self):
         self._init_dirs()
@@ -99,67 +104,6 @@ class Profiler:
         print(string, file=f)
 
 
-class ProfilerBuilder:
-    """
-    Generates a profiler
-    """
-
-    def __init__(self):
-        self._profiler = Profiler()
-        # Set everything to defaults
-        self.set_filename('maze') \
-            .set_RL_model('RLSolver/rl_script.py') \
-            .set_maze_generator_path('maze_generator/maze_generator')
-
-    def set_filename(self, filename):
-        self._profiler.filename = filename
-        return self
-
-    def set_maze_generator_path(self, path):
-        self._profiler.maze_generator_path = path
-        return self
-
-    def set_maze_XY(self, X, Y):
-        self._profiler.X = X
-        self._profiler.Y = Y
-        return self
-
-    def set_RL_model(self, RL_model):
-        self._profiler.RL_model = RL_model
-        return self
-
-    def set_csp_engine(self, engine='DFS'):
-        """
-        Can be BFS or DFS
-        """
-        # There are only two possible states so its fine to just force
-        # it into two things
-        if engine.lower() == 'dfs':
-            self._profiler.engine = 0
-        else:
-            self._profiler.engine = 1
-
-        return self
-
-    def get_profiler(self):
-        return self._profiler
-
-
-def extract_csp_profiles(csp_profile_directory):
-    pass
-
-
-def extract_RL_profiles(RL_profile_directory):
-    pass
-
-
-def extract_profile_dirs(main_directory):
-    # TODO: Open all of the profile directories and save them as a single
-    # file with the format of
-    # dict{'XShape, YShape' : [path length, time to solve in seconds, memory used in MB]}
-    pass
-
-
 def delete_directory(directory):
     """
     Deletes the entire temporary directory
@@ -178,15 +122,17 @@ if __name__ == '__main__':
     # argument
     for i in range(5, 506, 10):
         print("Doing", i)
-        profiler = ProfilerBuilder() \
-            .set_filename(str(i)) \
-            .set_RL_model('RLSolver/rl_script.py') \
-            .set_maze_XY(i, i) \
-            .set_csp_engine('DFS') \
-            .get_profiler()
+        profiler = Profiler()
+
+        profiler.filename = str(i)
+        profiler.RL_model = 'RLSolver/rl_script.py'
+        profiler.X = i
+        profiler.Y = i
+        profiler.engine = 0
 
         profiler.execute()
     print("COMPLETED ALL PROFILING")
+
     if manual_run_bat:
         print("Temp files have been left to allow the PAT loop batch file to run.")
         print("Delete contents of temp directory when PAT loop has been run and completed.")
