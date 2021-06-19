@@ -82,6 +82,14 @@
         produced minimal dead ends, is bias free and not uniform 
         \cite{source}.
 
+        \tab In terms of the hardware and software configuration, it was ran on
+        WSL2 inside of Windows 10 on a Ryzen 5900 with 32GB of RAM. Due to it
+        being in WSL2, mono was used to run PAT 3 which means that the times are
+        likely around three times slower than they would be on just Windows. 
+        The reason for using WSL2 is because we have access to the time command,
+        which makes recording the memory of the reinforcement learning script
+        easier. 
+
     \newpage
     \section{Results}\label{sec:results}
 

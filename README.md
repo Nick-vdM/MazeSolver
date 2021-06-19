@@ -29,7 +29,11 @@ file used by the RL scripts.
 
 ## Profiler.py
 This runs the maze generator, then runs the CSP and the RL on the same maze that 
-was made for a given number of loops with increments
+was made for a given number of loops with increments.
+
+One important thing is that this only functions on Linux because it uses the
+time command from there to measure memory. Additionally, this means that it runs
+noticeably slower than it would directly through windows (about a factor of 3).
 
 ## ProfileParser.py
 This consists of two classes, the ProfileParser and the GraphMaker. Due to how
