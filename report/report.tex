@@ -90,6 +90,11 @@
         which makes recording the memory of the reinforcement learning script
         easier. 
 
+        \tab With regards to the parameters of the RL, it was set to be at 
+        gamma$=0.99$, alpha=$0.1$, epsilon=$0.1$, max iterations to be 100 
+        and maximum steps were 1000. This means that no solutions were found
+        over 1000, but that's fine for this purpose.
+
     \section{Results}\label{sec:results}
 
         \begin{table}[ht!]
@@ -164,6 +169,16 @@
          and alpha and epsilon increases did nothing, likely because by the 
          time the algorithm had reached a dead end the chance of backtracking 
          was so low that it was effectively impossible to fix.
+
+
+         A noteworthy factor for interpreting these results is that RL is
+         basically finding a result in the case that it can complete $O(n)$, as
+         the results given here were generated under a constant environment for 
+         all the solutions. This means that the one solution it managed to find
+         at around maze size 300x300 is an outlier, and we can see that it
+         just managed to be found because the solution was so close. On the
+         other hand, DFS still managed to take a really roundabout path to find
+         it.
 
         \begin{figure}[ht]
             \begin{subfigure}{.5\textwidth}
