@@ -172,9 +172,10 @@
 
 
          A noteworthy factor for interpreting these results is that RL is
-         basically finding a result in the case that it can complete $O(n)$, as
+         basically finding a result in the case that it can complete $O(1)$, as
          the results given here were generated under a constant environment for 
-         all the solutions. This means that the one solution it managed to find
+         all the solutions. It just looks like $O(n)$ until it hits that wall. 
+         This means that the one solution it managed to find
          at around maze size 300x300 is an outlier, and we can see that it
          just managed to be found because the solution was so close. On the
          other hand, DFS still managed to take a really roundabout path to find
