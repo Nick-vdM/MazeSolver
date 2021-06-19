@@ -97,6 +97,7 @@ class ProfileParser:
                         else:
                             steps += char
 
+        print('steps', steps)
         return int(steps)
 
     def rolling_check_stderr(self, string: str):
@@ -112,13 +113,13 @@ class ProfileParser:
                         else:
                             time += char
 
-        if string[idx] == "M":
-            if string[idx:idx + 31] == "Maximumresidentsetsize(kbytes):":
-                for char in string[idx + 31:]:
-                    if char == "\\":
-                        break
-                    else:
-                        mem += char
+            if string[idx] == "M":
+                if string[idx:idx + 31] == "Maximumresidentsetsize(kbytes):":
+                    for char in string[idx + 31:]:
+                        if char == "\\":
+                            break
+                        else:
+                            mem += char
 
         return float(time), int(mem)
 
