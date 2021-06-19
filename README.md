@@ -1,14 +1,18 @@
 # Maze Solver
-## Main Script
-Essentially, we want a script that does this
-* Splits into n threads, and each has a unique name. On each thread:
-  * Run the maze generator with X * Y dimensions
-  * Solve with CSP, record time and path taken
-  * Solve with RL, record time and path taken
-* Average all the times together
+## Overview
+This consists of five tools. The PAT Solver folder, RLSolver folder, 
+maze_generator folder, and the Profiler and ProfileParser.
 
-These results should be graphed, trended to different big-O notations and 
-compared in the report section.
+## PAT Solver
+There are two files in here, a 'normal' maze solver that functions exactly
+like the shunting game, and a solver that marks where it has gone. It was noticed
+that if we mark the previous move, it lowers the maximum number of transitions
+and usually makes it faster with less memory usage.
+
+## Reinforcement Learning
+This is essentially just the lab split into individual scripts. The grid\_world 
+handles all of the operations with regards to the actual world, the rl\_agent 
+manages the RLAgent class, and the script ties them together.
 
 ## Maze Generator - Recursive backtracking
 This is a backtracking algorithm in C++ which is compiled on Cygwin using -O3. 
@@ -16,13 +20,20 @@ Backtracking was chosen because it results [with fewer but longer dead ends,
 and usually a very long and twisty solution](http://www.astrolog.org/labyrnth/algrithm.htm), 
 isn't uniform, and most importantly is bias free. We can generate a 
 100,000\*100,000 maze in five minutes using ten gigabytes of RAM, and 10,000\*
-10,000 in five seconds using 100MB of RAM. If we want to test even bigger, we 
-should move to using recursive division, but that can end up with a maze that 
-looks less 'human' as the passages are all either 2\*1 or 1\*2 in shape.
+10,000 in five seconds using 100MB of RAM. So the time spent on maze
+generation in comparison to other tasks is next to none.
 
-## PAT Solver
-Essentially just the shunting game in the example scripts. Requires testing to 
-check for memory overflow, must be able to survive until at least 1000\*1000.
+Another thing that is done in the maze generator is making the maze files.
+It fully prints the CSP file with the correct syntax, and prints the text
+file used by the RL scripts.
 
-## RL Model
-To check and optimise
+## Profiler.py
+This runs the maze generator, then runs the CSP and the RL on the same maze that 
+was made for a given number of loops with increments
+
+## ProfileParser.py
+This consists of two classes, the ProfileParser and the GraphMaker. Due to how
+the profiler produces just the outputs of the commands instead of parsing out the
+useful information, it extracts the actual useful parts.
+
+As for the graph maker, it makes graphs.
