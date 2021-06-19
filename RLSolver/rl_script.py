@@ -50,10 +50,9 @@ if __name__ == '__main__':
     """
     This program has a couple of arguments settings
     length = 0-2 : Fails
-    Length = 5 : maze_file_path, start position
-    length = 6 : maze_file_path, start position, maximum steps
-    length = 7 : maze_file_path, start position, max steps, maxiter
-    length = 9 :
+    Length = 3 : maze_file_path, start position
+    length = 4 : maze_file_path, start position, maximum steps
+    length = 8 :
             0 : maze_file_path,
             1: start position Y  | --> Note: [Y, X] is the position
             2: start position X  |
@@ -61,10 +60,11 @@ if __name__ == '__main__':
             4: alpha
             5: epsilon
             6: max iterations
-            7: maximum steps
+
+    7: maximum steps
     """
     if len(sys.argv) < 3:
-        print("I need to know where the maze is and what its called!" \
+        print("I need to know where the maze is and what its called!"\
               "Please do python3 RLSolver <mazelocation.txt> startY, startX")
         exit(1)
 
@@ -78,38 +78,33 @@ if __name__ == '__main__':
     agent = RLAgent(env)
     print("arguments are", sys.argv)
     start = [int(sys.argv[2]), int(sys.argv[3])]
+    
 
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         rtrace, steps, trace = agent.train(start,
                                            gamma=0.99,
                                            alpha=0.1,
                                            epsilon=0.1,
                                            maxiter=100,
-                                           maxstep=100)
-
-    elif len(sys.argv) == 5:
+                                           maxstep=sys.argv[5])
+    elif len(sys.argv) == 7:
         rtrace, steps, trace = agent.train(start,
-                                           gamma=0.99,
-                                           alpha=0.1,
-                                           epsilon=0.1,
-                                           maxiter=100,
-                                           maxstep=sys.argv[4])
-    elif len(sys.argv) == 6:
-
-        rtrace, steps, trace = agent.train(start,
-                                           gamma=0.99,
-                                           alpha=0.1,
-                                           epsilon=0.1,
-                                           maxiter=int(sys.argv[5]),
-                                           maxstep=int(sys.argv[4]))
-
+                                           gamma=sys.argv[4],
+                                           alpha=sys.argv[5],
+                                           epsilon=sys.argv[6],
+                                           maxiter=sys.argv[7],
+                                           maxstep=sys.argv[8])
     else:
         rtrace, steps, trace = agent.train(start,
-                                           gamma=float(sys.argv[4]),
-                                           alpha=float(sys.argv[5]),
-                                           epsilon=float(sys.argv[6]),
-                                           maxiter=int(sys.argv[7]),
-                                           maxstep=int(sys.argv[8]))
+                                        # gamma=0.99,
+                                        # alpha=0.1,
+                                        # epsilon=0.1,
+                                        # maxiter=100,
+                                        # maxstep=1000)
+                                        )
+    # print("Steps taken:", len(steps))
 
+    # plot_train(agent, rtrace, steps, trace, start)
     test_path = agent.test(start)
     print(f"Steps: {len(test_path)}\nPath: {test_path}")
+

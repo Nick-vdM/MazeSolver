@@ -1,11 +1,9 @@
 import numpy as np
 
-
 # top-left to (0,0)
 def coord_convert(s, sz):
     # return [s[1], sz[0]-s[0]-1]
     return s
-
 
 class RLAgent:
     """
@@ -38,7 +36,6 @@ class RLAgent:
         epsilon = params.pop('epsilon', 0.6)
         maxiter = params.pop('maxiter', 1000)
         maxstep = params.pop('maxstep', 1000)
-        print("The maximum iterations is", maxiter)
 
         # init self.Q matrix
         self.Q[...] = 0
@@ -82,7 +79,6 @@ class RLAgent:
         return rtrace, steps, trace  # last trace of trajectory
 
     def test(self, start, maxstep=1000):
-        found_goal = False
         self.env.init(start)
         s = self.env.get_cur_state()
         a = np.argmax(self.Q[s[0], s[1], :])
@@ -93,10 +89,7 @@ class RLAgent:
             a1 = np.argmax(self.Q[s1[0], s1[1], :])
             trace = np.vstack((trace, coord_convert(s1, self.size)))
             if self.env.is_goal():  # reached the goal
-                found_goal = True
                 break
             a = a1
 
-        if found_goal:
-            return trace
-        return np.array([])
+        return trace
