@@ -40,4 +40,5 @@ This consists of two classes, the ProfileParser and the GraphMaker. Due to how
 the profiler produces just the outputs of the commands instead of parsing out the
 useful information, it extracts the actual useful parts.
 
-As for the graph maker, it makes graphs.
+As for the graph maker, it makes graphs. Note these graphs weren't actually used
+in the report, but just to get a quick idea of what's to come.
