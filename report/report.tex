@@ -7,6 +7,7 @@
 \usepackage{amssymb}
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage{subcaption}
 
 \geometry{left = 2.5cm, right=2.5cm, bottom=2.5cm, top=2.5cm}
 
@@ -53,13 +54,13 @@
         drastically. This makes it very difficult to find the 
         optimal solution in a reasonable amount of time.
 
-        Q-learning and CSP model checking using DFS are two very different 
+        \tab Q-learning and CSP model checking using DFS are two very different 
         solutions to this maze search problem. Q-learning aims to search 
         for a path from start to goal using a reward function that guides 
         the algorithm, whereas CSP model checking using DFS is an exhaustive 
         search of possible paths to the goal.
 
-        One of the key differences between Q-learning and model checking is 
+        \tab One of the key differences between Q-learning and model checking is 
         that Q-learning is not guaranteed to find a path at all, whereas CSP 
         is able to find a path every single time. The downside of this is 
         that its runtime and memory usage can balloon quickly, and as maze 
@@ -71,6 +72,15 @@
         it with CSP in DFS mode and Q-learning. This allowed comparison of 
         the time taken for it to run, the length of the path it found, and 
         the memory it used to do so.
+
+        \tab As for the implementation of these, the maze generator utilised a
+        backtracking algorithm in $C++$, the CSP had an adjustment that marked its
+        previous moves, and the reinforcement learning was the lab's version
+        split into scripts. The reason for the maze using backtracking and being
+        so optimised is because we want to be able to speed up generating
+        samples. Furthermore, backtracking gives us a good time, memory,
+        produced minimal dead ends, is bias free and not uniform 
+        \cite{source}.
 
     \newpage
     \section{Results}\label{sec:results}
@@ -88,10 +98,17 @@
             \label{TimeAndSteps}
         \end{figure}
 
-         It can be seen from this figure that, when it successfully found a 
+         \tab It can be seen from this figure that, when it successfully found a 
          path, reinforcement learning was much quicker than CSP, following a 
-         time trend closer to O(n). CSP, on the other hand, followed a 
-         polynomial curve, somewhat following the $O(n^2)$ line on the graph.
+         time trend closer to $O(n)$. This is likely because the number of
+         iterations is a constant, and actually if we look at the table we can
+         see that the time spent trying to solve something is constant. 
+
+         \tab CSP, on the other hand, followed a polynomial curve, somewhat 
+         following the $O(n^2)$ line on the graph. This makes sense because CSP 
+         uses DFS, which would be $O(|V|+|E|)$ where $V$ is vertices (number 
+         of cells in the graph, which is $n^2$) and $E$ is edges (which is 
+         more or less constant).
 
         \begin{figure}[h]
             \centering
@@ -99,14 +116,14 @@
             \label{StepsOnly}
         \end{figure}
 
-         When the number of steps in the found path is shown on its own, 
+         \tab When the number of steps in the found path is shown on its own, 
          however, it paints a much worse picture for the Q-learning algorithm. 
          It was able to find a path from the start point to the goal in 
          only a few of the maze sizes, whereas CSP (while eventually 
          running out of memory) was able to find a path in every maze 
          it was able to search.
 
-         It is suspected here that Q-learning often failed to find the goal 
+         \tab It is suspected here that Q-learning often failed to find the goal 
          in larger maze sizes due to its reward algorithm. As it proceeded 
          through the maze and its step count for each iteration increased, 
          it became less and less likely to perform the required 'random' 
@@ -115,7 +132,7 @@
          higher incentive for the algorithm to remain
          in the current state than move back out.
 
-         Different configurations of starting values were tested to try 
+         \tab Different configurations of starting values were tested to try 
          overcoming this problem, such as increasing alpha, gamma, epsilon, 
          the maximum number of steps and the maximum number of iterations. 
          However, none of these were capable of avoiding the issue faced. 
@@ -132,7 +149,7 @@
             \label{MemOnly}
         \end{figure}
 
-         This graph shows the difference in memory usage between RL and CSP. 
+         \tab This graph shows the difference in memory usage between RL and CSP. 
          This is to be expected, as DFS is an exhaustive search, which holds 
          all of the current nodes for the path currently being checked in 
          memory. While more memory efficient than BFS, it is still very 
@@ -141,24 +158,26 @@
 
     \section{Conclusion}\label{sec:conclusion}
 
-        In testing for this report, it is clear that Q-learning does not 
+        \tab In testing for this report, it is clear that Q-learning does not 
         perform as well as CSP for this task at such high maze sizes. 
         It was consistently faster, less memory intensive and more accurate 
         than CSP at smaller maze sizes, however the algorithm could not perform 
         at higher maze sizes, failing to find paths at all.
 
-        It is advised that this be the subject of further study. By modifying 
-        the Q-learning algorithm to incentivise leaving dead-end paths 
-        (perhaps by imposing a penalty for repeatedly entering the same 
-        states, or a reward for finding new states), it may be possible to 
-        better tailor the algorithm to this problem, allowing it to be as
-        effective at large sizes as it is at smaller ones.
-
+        \tab It is advised that the reinforcement learning algorithm be adjusted
+        to be dynamic (scaling the variables based on the maze size), and
+        introducing a random restart algorithm to it. An alternative to random
+        restart would be to just introduce a penalty for repeatedly entering the
+        same states, or rewarding it for finding new ones. With these, it is
+        potentially possible to keep an $O(n)$ time complexity solving the maze at
+        larger mazes as well.
+        \\ \\
         If a solution were to be required for deployment using identical 
         configurations to those used in this report, it is recommended that 
         Q-learning be used for smaller maze sizes (for example, below 50) and 
         CSP be used for maze sizes that are larger.
 
 %==============================================================================
-
+    \bibliographystyle{apalike}
+    \bibliography{biblio}
 \end{document}
