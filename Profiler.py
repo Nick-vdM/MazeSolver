@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import math
 
 manual_run_bat = True
 regen_mazes = True
@@ -79,27 +80,40 @@ class Profiler:
         # Note PAT is pretty silly. The input file is relative to the current
         # working directory and the output file is relative to the actual
         # executable. Which in our case, is at two different places.
+        print("Running csp")
         model_out = '../profiles/csp/' + self.filename
         self.pat3_print = \
             subprocess.check_output(['mono', 'PAT3/PAT3.Console.exe',
                                      '-engine', str(self.engine),
                                      self.csp_model_and_maze, model_out])
+        print("CSP did", self.pat3_print)
 
     def _run_RL_model(self):
-        # TODO: Test whether this prints the start pos correctly
         with open(self.txt_start_pos, 'r') as f:
             start_pos = f.read()
         split_start = start_pos.split(' ')
+        max_length = str(int((self.X * math.log(self.X, math.e))))
+        max_iterations = str(int(10 * self.X * math.log(self.X, math.e)))
+
+
+        # self.rl_time_verbose = subprocess.run([
+        #     '/usr/bin/time', '-v', 'python3',
+        #     self.RL_model, self.txt_maze_path,
+        #     split_start[0], split_start[1]
+        # ], capture_output=True)
+
         self.rl_time_verbose = subprocess.run([
             '/usr/bin/time', '-v', 'python3',
             self.RL_model, self.txt_maze_path,
-            split_start[0], split_start[1]
+            split_start[0], split_start[1],
+            max_length, max_iterations
         ], capture_output=True)
 
         self._save_string_to_file(self.rl_time_verbose, 'profiles/rl/' \
                                   + self.filename)
 
     def _save_string_to_file(self, string, filepath):
+        print("Saving to file", filepath)
         f = open(filepath, 'wt')
         print(string, file=f)
 

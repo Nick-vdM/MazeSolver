@@ -24,10 +24,12 @@ class ProfileParser:
             steps = self.rolling_check_stdout(out)
             self.rl_time_arr.append(time)
             self.rl_mem_arr.append(mem)
-            if steps < 1000:
-                self.rl_step_arr.append(steps)
-            else:
+
+            if steps == 0:
                 self.rl_step_arr.append(None)
+            else:
+                self.rl_step_arr.append(steps)
+
             self.rl_size_arr.append(i)
 
         for i in range(len(self.rl_time_arr)):
