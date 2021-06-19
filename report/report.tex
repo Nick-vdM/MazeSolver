@@ -99,10 +99,18 @@
         \end{table}
         \newpage
 
-        \begin{figure}[h]
-            \centering
-            \includegraphics[scale=0.6]{assets/TimeOnly.png}
-            \label{TimeAndSteps}
+
+        \begin{figure}[ht]
+            \begin{subfigure}{.5\textwidth}
+                \centering
+                \includegraphics[scale=0.5]{assets/CSPTimeVsSize.PNG}
+                \caption{Model checking time vs size}
+            \end{subfigure}
+            \begin{subfigure}{.5\textwidth}
+                \centering
+                \includegraphics[scale=0.5]{assets/RLTimeVsSize.PNG}
+                \caption{RL time vs size}
+            \end{subfigure}
         \end{figure}
 
          \tab It can be seen from this figure that, when it successfully found a 
@@ -117,10 +125,17 @@
          of cells in the graph, which is $n^2$) and $E$ is edges (which is 
          more or less constant).
 
-        \begin{figure}[h]
-            \centering
-            \includegraphics[scale=0.6]{assets/StepsOnly.png}
-            \label{StepsOnly}
+        \begin{figure}[ht]
+            \begin{subfigure}{.5\textwidth}
+                \centering
+                \includegraphics[scale=0.5]{assets/CSPPathVsSize.PNG}
+                \caption{Model checking steps vs maze size}
+            \end{subfigure}
+            \begin{subfigure}{.5\textwidth}
+                \centering
+                \includegraphics[scale=0.5]{assets/RLPathVsSize.PNG}
+                \caption{RL steps vs maze size}
+            \end{subfigure}
         \end{figure}
 
          \tab When the number of steps in the found path is shown on its own, 
@@ -151,9 +166,17 @@
          was so low that it was effectively impossible to fix.
 
         \begin{figure}[ht]
-            \centering
-            \includegraphics[scale=0.6]{assets/MemOnly.png}
-            \label{MemOnly}
+            \begin{subfigure}{.5\textwidth}
+                \centering
+                \includegraphics[scale=0.5]{assets/CSPMemoryVsSize.PNG}
+                \caption{Model checking memory vs size}
+            \end{subfigure}
+            \begin{subfigure}{.5\textwidth}
+                \centering
+                \includegraphics[scale=0.5]{assets/RlMemoryVsSize.PNG}
+                \caption{RL memory vs size}
+                \label{sonarCode}
+            \end{subfigure}
         \end{figure}
 
          \tab This graph shows the difference in memory usage between RL and CSP. 
